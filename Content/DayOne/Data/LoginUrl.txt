@@ -1,0 +1,1 @@
+https://dayone.auth.ap-northeast-1.amazoncognito.com/login?client_id=6olratt2aidlnjc9b4aq01dumf&response_type=code&scope=aws.cognito.signin.user.admin+dayone.api/access+email+openid+phone+profile&redirect_uri=https://dayone.poc.awserverless.com/v1-dev/getsigninresult
