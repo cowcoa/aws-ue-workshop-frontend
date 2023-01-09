@@ -38,6 +38,8 @@ protected:
 	class UTextBlock* TextBlock_Ping;
 	
 private:
+	class FGameLiftClientModule* GLClientModule;
+	
 	UFUNCTION()
 	void SetTeammateCount();
 

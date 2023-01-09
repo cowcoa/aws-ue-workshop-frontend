@@ -3,6 +3,7 @@
 
 #include "DayOneWidget.h"
 
+#include "GameLiftClientModule.h"
 #include "Components/TextBlock.h"
 #include "DayOne/DayOneGameInstance.h"
 #include "DayOne/GameStates/DayOneGameState.h"
@@ -11,6 +12,8 @@
 void UDayOneWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	GLClientModule = &FGameLiftClientModule::Get();
 
 	GetWorld()->GetTimerManager().SetTimer(SetTeammateCountHandle, this, &ThisClass::SetTeammateCount, 1.0f, true, 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(SetLatestEventHandle, this, &ThisClass::SetLatestEvent, 1.0f, true, 1.0f);

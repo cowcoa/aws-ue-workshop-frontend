@@ -8,7 +8,7 @@ public class DayOne : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "GameLiftServerSDK", "UMG", "SlateCore", "HTTP", "Json", "JsonUtilities", "WebBrowserWidget" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "GameLiftServerSDK", "UMG", "SlateCore", "HTTP", "Json", "JsonUtilities", "WebBrowserWidget", "GameLiftClient" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

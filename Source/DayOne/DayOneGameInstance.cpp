@@ -13,6 +13,7 @@ UDayOneGameInstance::UDayOneGameInstance()
 	RegionCode = TextFileReader->ReadFile("DayOne/Data/RegionCode.txt");
 
 	HttpModule = &FHttpModule::Get();
+	GLClientModule = &FGameLiftClientModule::Get();
 }
 
 void UDayOneGameInstance::SetCognitoTokens(FString NewAccessToken, FString NewIdToken, FString NewRefreshToken)
@@ -24,7 +25,7 @@ void UDayOneGameInstance::SetCognitoTokens(FString NewAccessToken, FString NewId
 	//UE_LOG(LogTemp, Warning, TEXT("access token: %s"), *AccessToken);
 	//UE_LOG(LogTemp, Warning, TEXT("refresh token: %s"), *RefreshToken);
 
-	GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UDayOneGameInstance::RetrieveNewTokens, 1.0f, false, 3300.0f);
+	GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UDayOneGameInstance::RetrieveNewTokens, 1.0f, false, GLClientModule->GameLiftClient->TokenExpiresIn - 60);
 }
 
 void UDayOneGameInstance::Init()
@@ -38,7 +39,8 @@ void UDayOneGameInstance::Shutdown()
 {
 	GetWorld()->GetTimerManager().ClearTimer(RetrieveNewTokensHandle);
 	GetWorld()->GetTimerManager().ClearTimer(GetResponseTimeHandle);
-	
+
+	/*
 	if (AccessToken.Len() > 0) {
 		if (MatchmakingTicketId.Len() > 0) {
 			TSharedPtr<FJsonObject> RequestObj = MakeShareable(new FJsonObject);
@@ -63,12 +65,18 @@ void UDayOneGameInstance::Shutdown()
 		InvalidateTokensRequest->SetHeader("Authorization", AccessToken);
 		InvalidateTokensRequest->ProcessRequest();
 	}
+	*/
 	
 	Super::Shutdown();
 }
 
 void UDayOneGameInstance::RetrieveNewTokens()
 {
+	if (GLClientModule->GameLiftClient->IsTokenValid())
+	{
+		GLClientModule->GameLiftClient->RefreshTokens();
+	}
+	/*
 	if (AccessToken.Len() > 0 && RefreshToken.Len() > 0) {
 		TSharedPtr<FJsonObject> RequestObj = MakeShareable(new FJsonObject);
 		RequestObj->SetStringField("refreshToken", RefreshToken);
@@ -90,15 +98,20 @@ void UDayOneGameInstance::RetrieveNewTokens()
 			GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UDayOneGameInstance::RetrieveNewTokens, 1.0f, false, 30.0f);
 		}
 	}
+	*/
 }
 
 void UDayOneGameInstance::GetResponseTime()
 {
+	GLClientModule->GameLiftClient->TestLatency().BindUObject(this, &ThisClass::OnGLTestLatencyResponse);
+	
+	/*
 	TSharedRef<IHttpRequest> GetResponseTimeRequest = HttpModule->CreateRequest();
 	GetResponseTimeRequest->OnProcessRequestComplete().BindUObject(this, &UDayOneGameInstance::OnGetResponseTimeResponseReceived);
 	GetResponseTimeRequest->SetURL("https://gamelift." + RegionCode + ".amazonaws.com");
 	GetResponseTimeRequest->SetVerb("GET");
 	GetResponseTimeRequest->ProcessRequest();
+	*/
 }
 
 void UDayOneGameInstance::OnRetrieveNewTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response,
@@ -132,4 +145,14 @@ void UDayOneGameInstance::OnGetResponseTimeResponseReceived(FHttpRequestPtr Requ
 	//UE_LOG(LogTemp, Warning, TEXT("response time in milliseconds: %s"), *FString::SanitizeFloat(ResponseTime));
 
 	PlayerLatencies.AddTail(ResponseTime);
+}
+
+void UDayOneGameInstance::OnGLTestLatencyResponse(LatencyMap AverageLatencyMap)
+{
+	/*
+	for (const TPair<FString, float>& Pair : AverageLatencyMap)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Region: %s, Latency: %f"), *Pair.Key, Pair.Value);
+	}
+	*/
 }

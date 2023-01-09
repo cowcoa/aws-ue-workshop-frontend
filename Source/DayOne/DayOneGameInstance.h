@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
+#include "GameLiftClientModule.h"
 #include "DayOneGameInstance.generated.h"
 
 /**
@@ -47,6 +48,7 @@ protected:
 
 private:
 	FHttpModule* HttpModule;
+	class FGameLiftClientModule* GLClientModule;
 
 	UPROPERTY()
 	FString ApiUrl;
@@ -62,4 +64,7 @@ private:
 
 	void OnRetrieveNewTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnGetResponseTimeResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	//
+	void OnGLTestLatencyResponse(LatencyMap AverageLatencyMap);
 };

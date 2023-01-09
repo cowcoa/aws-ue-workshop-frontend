@@ -43,6 +43,7 @@ protected:
 
 private:
 	FHttpModule* HttpModule;
+	class FGameLiftClientModule* GLClientModule;
 
 	UPROPERTY()
 	FString LoginUrl;
@@ -63,7 +64,7 @@ private:
 	bool SearchingForGame;
 
 	UFUNCTION()
-	void HandleLoginUrlChange();
+	void OnLoginUrlChanged(const FText& BrowserUrl);
 
 	UFUNCTION()
 	void SetAveragePlayerLatency();
@@ -79,4 +80,13 @@ private:
 	void OnStartMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnStopMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnPollMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	void OnGLLoginResponse(FString AuthzCode);
+	void OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn);
+	void OnGLGetPlayerDataResponse(FString PlayerId, int Wins, int Losses);
+	void OnGLStartMatchmakingResponse(FString TicketId);
+	void OnGLStopMatchmakingResponse();
+	FTimerHandle PollMatchmakingTimerHandle;
+	void PollGLMatchmaking(FString TicketId);
+	void OnGLPollMatchmakingResponse(FString TicketType, FString PlayerId, FString PlayerSessionId, FString IpAddress, FString Port);
 };
