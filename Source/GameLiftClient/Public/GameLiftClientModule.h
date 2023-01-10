@@ -22,5 +22,5 @@ private:
 	static FGameLiftClientModule* Singleton;
 
 public:
-	class UGameLiftClient* GameLiftClient;
+	UGameLiftClient* GameLiftClient;
 };

@@ -42,7 +42,7 @@ bool UGameLiftClient::IsTokenValid() const
 	return false;
 }
 
-FOnLoginResponse& UGameLiftClient::ShowCowLoginUI(UWebBrowser& WebBrowser)
+FOnLoginResponse& UGameLiftClient::ShowLoginUI(UWebBrowser& WebBrowser)
 {
 	// Load Cognito Hosted UI.
 	if (!WebBrowser.IsVisible())

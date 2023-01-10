@@ -2,7 +2,7 @@
 
 IMPLEMENT_MODULE(FGameLiftClientModule, GameLiftClient);
 
-FGameLiftClientModule* FGameLiftClientModule::Singleton = NULL;
+FGameLiftClientModule* FGameLiftClientModule::Singleton = nullptr;
 
 void FGameLiftClientModule::StartupModule()
 {
@@ -19,11 +19,11 @@ void FGameLiftClientModule::ShutdownModule()
 
 FGameLiftClientModule& FGameLiftClientModule::Get()
 {
-	if (Singleton == NULL)
+	if (Singleton == nullptr)
 	{
 		check(IsInGameThread());
 		FModuleManager::LoadModuleChecked<FGameLiftClientModule>("GameLiftClient");
 	}
-	check(Singleton != NULL);
+	check(Singleton != nullptr);
 	return *Singleton;
 }

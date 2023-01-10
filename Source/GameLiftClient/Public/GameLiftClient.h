@@ -46,7 +46,7 @@ public:
 	bool IsTokenValid() const;
 
 	// ShowLoginUI
-	FOnLoginResponse& ShowCowLoginUI(UWebBrowser& WebBrowser);
+	FOnLoginResponse& ShowLoginUI(UWebBrowser& WebBrowser);
 	UFUNCTION()
 	void OnLoginUrlChanged(const FText& BrowserUrl);
 	FOnLoginResponse OnLoginResponse;

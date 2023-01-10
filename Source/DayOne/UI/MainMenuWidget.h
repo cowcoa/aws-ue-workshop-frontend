@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Runtime/Online/HTTP/Public/Http.h"
 #include "MainMenuWidget.generated.h"
 
 /**
@@ -19,7 +18,7 @@ public:
 	UMainMenuWidget(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY()
-	FTimerHandle SetAveragePlayerLatencyHandle;
+	FTimerHandle UpdateLatencyUIHandle;
 
 	UPROPERTY()
 	FTimerHandle PollMatchmakingHandle;
@@ -42,29 +41,10 @@ protected:
 	class UTextBlock* TextBlock_MatchmakingEvent;
 
 private:
-	FHttpModule* HttpModule;
 	class FGameLiftClientModule* GLClientModule;
 
 	UPROPERTY()
-	FString LoginUrl;
-
-	UPROPERTY()
-	FString ApiUrl;
-
-	UPROPERTY()
-	FString CallbackUrl;
-
-	UPROPERTY()
-	FString RegionCode;
-
-	UPROPERTY()
-	float AveragePlayerLatency;
-
-	UPROPERTY()
-	bool SearchingForGame;
-
-	UFUNCTION()
-	void OnLoginUrlChanged(const FText& BrowserUrl);
+	bool bSearchingForGameSession;
 
 	UFUNCTION()
 	void SetAveragePlayerLatency();
@@ -75,18 +55,10 @@ private:
 	UFUNCTION()
 	void PollMatchmaking();
 
-	void OnExchangeCodeForTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void OnGetPlayerDataResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void OnStartMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void OnStopMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void OnPollMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
 	void OnGLLoginResponse(FString AuthzCode);
 	void OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn);
 	void OnGLGetPlayerDataResponse(FString PlayerId, int Wins, int Losses);
 	void OnGLStartMatchmakingResponse(FString TicketId);
 	void OnGLStopMatchmakingResponse();
-	FTimerHandle PollMatchmakingTimerHandle;
-	void PollGLMatchmaking(FString TicketId);
 	void OnGLPollMatchmakingResponse(FString TicketType, FString PlayerId, FString PlayerSessionId, FString IpAddress, FString Port);
 };
