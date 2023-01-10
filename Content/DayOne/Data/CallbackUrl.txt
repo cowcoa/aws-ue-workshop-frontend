@@ -1,1 +1,0 @@
-https://dayone.poc.awserverless.com/v1-dev/getsigninresult
