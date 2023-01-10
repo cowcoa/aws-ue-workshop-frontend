@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "Runtime/Online/HTTP/Public/Http.h"
-#include "GameLiftClientModule.h"
 #include "DayOneGameInstance.generated.h"
 
 /**
@@ -20,51 +18,27 @@ public:
 	UDayOneGameInstance();
 
 	UPROPERTY()
-	FString AccessToken;
+	FTimerHandle RefreshTokensHandle;
 
 	UPROPERTY()
-	FString IdToken;
-
-	UPROPERTY()
-	FString RefreshToken;
-
-	UPROPERTY()
-	FString MatchmakingTicketId;
-
-	UPROPERTY()
-	FTimerHandle RetrieveNewTokensHandle;
-
-	UPROPERTY()
-	FTimerHandle GetResponseTimeHandle;
-
-	TDoubleLinkedList<float> PlayerLatencies;
+	FTimerHandle TestLatencyHandle;
 
 	UFUNCTION()
-	void SetCognitoTokens(FString NewAccessToken, FString NewIdToken, FString NewRefreshToken);
+	void SetRefreshTokensTimer();
 
 protected:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
 private:
-	FHttpModule* HttpModule;
 	class FGameLiftClientModule* GLClientModule;
 
-	UPROPERTY()
-	FString ApiUrl;
-
-	UPROPERTY()
-	FString RegionCode;
+	UFUNCTION()
+	void RefreshTokens();
 
 	UFUNCTION()
-	void RetrieveNewTokens();
-
-	UFUNCTION()
-	void GetResponseTime();
-
-	void OnRetrieveNewTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void OnGetResponseTimeResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
+	void TestLatency();
+	
 	//
-	void OnGLTestLatencyResponse(LatencyMap AverageLatencyMap);
+	void OnGLRefreshTokensResponse(FString AccessToken, bool bIsSuccessful);
 };

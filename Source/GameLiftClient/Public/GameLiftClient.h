@@ -13,7 +13,7 @@ typedef TMap<FString, TSharedPtr<LatencyList> > LatencyListMap;
 
 DECLARE_DELEGATE_OneParam(FOnLoginResponse, FString /*AuthzCode*/);
 DECLARE_DELEGATE_ThreeParams(FOnExchangeCodeToTokensResponse, FString /*AccessToken*/, FString /*RefreshToken*/, int /*ExpiresIn*/);
-DECLARE_DELEGATE_OneParam(FOnRefreshTokensResponse, FString /*AccessToken*/);
+DECLARE_DELEGATE_TwoParams(FOnRefreshTokensResponse, FString /*AccessToken*/, bool /*bIsSuccessful*/);
 DECLARE_DELEGATE(FOnRevokeTokensResponse);
 DECLARE_DELEGATE_ThreeParams(FOnGetPlayerDataResponse, FString /*PlayerId*/, int /*Wins*/, int /*Losses*/);
 DECLARE_DELEGATE_OneParam(FOnStartMatchmakingResponse, FString /*TicketId*/);

@@ -103,6 +103,8 @@ void UDayOneWidget::SetLatestEvent()
 
 void UDayOneWidget::SetAveragePlayerLatency()
 {
+	TextBlock_Ping->SetText(FText::FromString("Latency: TODO"));
+	/*
 	UGameInstance* GameInstance = GetGameInstance();
 	if (GameInstance != nullptr) {
 		UDayOneGameInstance* DayOneGameInstance = Cast<UDayOneGameInstance>(GameInstance);
@@ -122,4 +124,5 @@ void UDayOneWidget::SetAveragePlayerLatency()
 			}
 		}
 	}
+	*/
 }

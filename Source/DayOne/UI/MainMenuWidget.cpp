@@ -28,7 +28,7 @@ void UMainMenuWidget::NativeConstruct()
 	// Register handler to process matchmaking button clicked.
 	Button_Matchmaking->OnClicked.AddUniqueDynamic(this, &ThisClass::OnMatchmakingButtonClicked);
 	// Setup timer to update latency UI text
-	GetWorld()->GetTimerManager().SetTimer(UpdateLatencyUIHandle, this, &UMainMenuWidget::SetAveragePlayerLatency, 1.0f, true, 1.0f);
+	GetWorld()->GetTimerManager().SetTimer(UpdateLatencyUIHandle, this, &UMainMenuWidget::UpdateLatencyUI, 1.0f, true, 1.0f);
 
 	// Check if Cognito token is valid.
 	// If token still valid we don't need to show login Ui to player. Just update player info to display.
@@ -65,35 +65,13 @@ void UMainMenuWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UMainMenuWidget::SetAveragePlayerLatency()
+void UMainMenuWidget::UpdateLatencyUI()
 {
 	for (const TPair<FString, float>& Pair : GLClientModule->GameLiftClient->AverageLatencyPerRegion)
 	{
-		FString PingString = FString::Printf(TEXT("%s Ping: %d\n"), *Pair.Key,  FMath::RoundToInt(Pair.Value));
-		//FString PingString = "Ping: " + FString::FromInt(FMath::RoundToInt(AveragePlayerLatency)) + "ms";
+		FString PingString = FString::Printf(TEXT("%s Latency: %dms\n"), *Pair.Key,  FMath::RoundToInt(Pair.Value));
 		TextBlock_Ping->SetText(FText::FromString(PingString));
 	}
-
-	/*
-	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance != nullptr) {
-		UDayOneGameInstance* DayOneGameInstance = Cast<UDayOneGameInstance>(GameInstance);
-		if (DayOneGameInstance != nullptr)
-		{
-			float TotalPlayerLatency = 0.0f;
-			for (float PlayerLatency : DayOneGameInstance->PlayerLatencies) {
-				TotalPlayerLatency += PlayerLatency;
-			}
-
-			if (TotalPlayerLatency > 0) {
-				AveragePlayerLatency = TotalPlayerLatency / DayOneGameInstance->PlayerLatencies.Num();
-
-				FString PingString = "Ping: " + FString::FromInt(FMath::RoundToInt(AveragePlayerLatency)) + "ms";
-				TextBlock_Ping->SetText(FText::FromString(PingString));
-			}
-		}
-	}
-	*/
 }
 
 void UMainMenuWidget::OnMatchmakingButtonClicked()
@@ -148,7 +126,7 @@ void UMainMenuWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, FStr
 	if (GameInstance != nullptr) {
 		UDayOneGameInstance* DayOneGameInstance = Cast<UDayOneGameInstance>(GameInstance);
 		if (DayOneGameInstance != nullptr) {
-			DayOneGameInstance->SetCognitoTokens(AccessToken, AccessToken, RefreshToken);
+			DayOneGameInstance->SetRefreshTokensTimer();
 		}
 	}
 

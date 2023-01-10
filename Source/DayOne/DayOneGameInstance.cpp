@@ -2,157 +2,55 @@
 
 
 #include "DayOneGameInstance.h"
-
-#include "HttpModule.h"
-#include "Components/TextFileReaderComponent.h"
+#include "GameLiftClientModule.h"
 
 UDayOneGameInstance::UDayOneGameInstance()
 {
-	UTextFileReaderComponent* TextFileReader = CreateDefaultSubobject<UTextFileReaderComponent>(TEXT("UTextFileReader"));
-	ApiUrl = TextFileReader->ReadFile("DayOne/Data/ApiUrl.txt");
-	RegionCode = TextFileReader->ReadFile("DayOne/Data/RegionCode.txt");
-
-	HttpModule = &FHttpModule::Get();
 	GLClientModule = &FGameLiftClientModule::Get();
 }
 
-void UDayOneGameInstance::SetCognitoTokens(FString NewAccessToken, FString NewIdToken, FString NewRefreshToken)
+void UDayOneGameInstance::SetRefreshTokensTimer()
 {
-	AccessToken = NewAccessToken;
-	IdToken = NewIdToken;
-	RefreshToken = NewRefreshToken;
-
-	//UE_LOG(LogTemp, Warning, TEXT("access token: %s"), *AccessToken);
-	//UE_LOG(LogTemp, Warning, TEXT("refresh token: %s"), *RefreshToken);
-
-	GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UDayOneGameInstance::RetrieveNewTokens, 1.0f, false, GLClientModule->GameLiftClient->TokenExpiresIn - 60);
+	GetWorld()->GetTimerManager().SetTimer(RefreshTokensHandle, this, &UDayOneGameInstance::RefreshTokens, 1.0f, false, GLClientModule->GameLiftClient->TokenExpiresIn - 300);
 }
 
 void UDayOneGameInstance::Init()
 {
 	Super::Init();
 
-	GetWorld()->GetTimerManager().SetTimer(GetResponseTimeHandle, this, &UDayOneGameInstance::GetResponseTime, 1.0f, true, 1.0f);
+	GetWorld()->GetTimerManager().SetTimer(TestLatencyHandle, this, &UDayOneGameInstance::TestLatency, 1.0f, true, 1.0f);
 }
 
 void UDayOneGameInstance::Shutdown()
 {
-	GetWorld()->GetTimerManager().ClearTimer(RetrieveNewTokensHandle);
-	GetWorld()->GetTimerManager().ClearTimer(GetResponseTimeHandle);
-
-	/*
-	if (AccessToken.Len() > 0) {
-		if (MatchmakingTicketId.Len() > 0) {
-			TSharedPtr<FJsonObject> RequestObj = MakeShareable(new FJsonObject);
-			RequestObj->SetStringField("ticketId", MatchmakingTicketId);
-
-			FString RequestBody;
-			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RequestBody);
-			if (FJsonSerializer::Serialize(RequestObj.ToSharedRef(), Writer)) {
-				TSharedRef<IHttpRequest> StopMatchmakingRequest = HttpModule->CreateRequest();
-				StopMatchmakingRequest->SetURL(ApiUrl + "/stopmatchmaking");
-				StopMatchmakingRequest->SetVerb("POST");
-				StopMatchmakingRequest->SetHeader("Content-Type", "application/json");
-				StopMatchmakingRequest->SetHeader("Authorization", AccessToken);
-				StopMatchmakingRequest->SetContentAsString(RequestBody);
-				StopMatchmakingRequest->ProcessRequest();
-			}
-		}
-		TSharedRef<IHttpRequest> InvalidateTokensRequest = HttpModule->CreateRequest();
-		InvalidateTokensRequest->SetURL(ApiUrl + "/invalidatetokens");
-		InvalidateTokensRequest->SetVerb("GET");
-		//InvalidateTokensRequest->SetHeader("Content-Type", "application/json");
-		InvalidateTokensRequest->SetHeader("Authorization", AccessToken);
-		InvalidateTokensRequest->ProcessRequest();
-	}
-	*/
+	GetWorld()->GetTimerManager().ClearTimer(RefreshTokensHandle);
+	GetWorld()->GetTimerManager().ClearTimer(TestLatencyHandle);
+	
+	GLClientModule->GameLiftClient->RevokeTokens();
 	
 	Super::Shutdown();
 }
 
-void UDayOneGameInstance::RetrieveNewTokens()
+void UDayOneGameInstance::RefreshTokens()
 {
-	if (GLClientModule->GameLiftClient->IsTokenValid())
+	GLClientModule->GameLiftClient->RefreshTokens().BindUObject(this, &ThisClass::OnGLRefreshTokensResponse);
+}
+
+void UDayOneGameInstance::TestLatency()
+{
+	GLClientModule->GameLiftClient->TestLatency();
+}
+
+void UDayOneGameInstance::OnGLRefreshTokensResponse(FString AccessToken, bool bIsSuccessful)
+{
+	if (bIsSuccessful)
 	{
-		GLClientModule->GameLiftClient->RefreshTokens();
+		// Reset normal timer
+		SetRefreshTokensTimer();
 	}
-	/*
-	if (AccessToken.Len() > 0 && RefreshToken.Len() > 0) {
-		TSharedPtr<FJsonObject> RequestObj = MakeShareable(new FJsonObject);
-		RequestObj->SetStringField("refreshToken", RefreshToken);
-
-		FString RequestBody;
-		TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RequestBody);
-
-		if (FJsonSerializer::Serialize(RequestObj.ToSharedRef(), Writer)) {
-			TSharedRef<IHttpRequest> RetrieveNewTokensRequest = HttpModule->CreateRequest();
-			RetrieveNewTokensRequest->OnProcessRequestComplete().BindUObject(this, &UDayOneGameInstance::OnRetrieveNewTokensResponseReceived);
-			RetrieveNewTokensRequest->SetURL(ApiUrl + "/retrievenewtokens");
-			RetrieveNewTokensRequest->SetVerb("POST");
-			RetrieveNewTokensRequest->SetHeader("Content-Type", "application/json");
-			RetrieveNewTokensRequest->SetHeader("Authorization", AccessToken);
-			RetrieveNewTokensRequest->SetContentAsString(RequestBody);
-			RetrieveNewTokensRequest->ProcessRequest();
-		}
-		else {
-			GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UDayOneGameInstance::RetrieveNewTokens, 1.0f, false, 30.0f);
-		}
-	}
-	*/
-}
-
-void UDayOneGameInstance::GetResponseTime()
-{
-	GLClientModule->GameLiftClient->TestLatency().BindUObject(this, &ThisClass::OnGLTestLatencyResponse);
-	
-	/*
-	TSharedRef<IHttpRequest> GetResponseTimeRequest = HttpModule->CreateRequest();
-	GetResponseTimeRequest->OnProcessRequestComplete().BindUObject(this, &UDayOneGameInstance::OnGetResponseTimeResponseReceived);
-	GetResponseTimeRequest->SetURL("https://gamelift." + RegionCode + ".amazonaws.com");
-	GetResponseTimeRequest->SetVerb("GET");
-	GetResponseTimeRequest->ProcessRequest();
-	*/
-}
-
-void UDayOneGameInstance::OnRetrieveNewTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response,
-                                                              bool bWasSuccessful)
-{
-	if (bWasSuccessful) {
-		TSharedPtr<FJsonObject> JsonObject;
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-		if (FJsonSerializer::Deserialize(Reader, JsonObject)) {
-			if (JsonObject->HasField("accessToken") && JsonObject->HasField("idToken")) {
-				SetCognitoTokens(JsonObject->GetStringField("accessToken"), JsonObject->GetStringField("idToken"), RefreshToken);
-			}
-		}
-		else {
-			GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UDayOneGameInstance::RetrieveNewTokens, 1.0f, false, 30.0f);
-		}
-	}
-	else {
-		GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UDayOneGameInstance::RetrieveNewTokens, 1.0f, false, 30.0f);
-	}
-}
-
-void UDayOneGameInstance::OnGetResponseTimeResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response,
-	bool bWasSuccessful)
-{
-	if (PlayerLatencies.Num() >= 4) {
-		PlayerLatencies.RemoveNode(PlayerLatencies.GetHead());
-	}
-
-	float ResponseTime = Request->GetElapsedTime() * 1000;
-	//UE_LOG(LogTemp, Warning, TEXT("response time in milliseconds: %s"), *FString::SanitizeFloat(ResponseTime));
-
-	PlayerLatencies.AddTail(ResponseTime);
-}
-
-void UDayOneGameInstance::OnGLTestLatencyResponse(LatencyMap AverageLatencyMap)
-{
-	/*
-	for (const TPair<FString, float>& Pair : AverageLatencyMap)
+	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Region: %s, Latency: %f"), *Pair.Key, Pair.Value);
+		// Set faster timer
+		GetWorld()->GetTimerManager().SetTimer(RefreshTokensHandle, this, &UDayOneGameInstance::RefreshTokens, 1.0f, false, 30.0f);
 	}
-	*/
 }

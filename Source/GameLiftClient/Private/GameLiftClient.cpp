@@ -173,20 +173,43 @@ void UGameLiftClient::OnRefreshTokensResponseReceived(FHttpRequestPtr Request, F
 {
 	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnRefreshTokensResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
-	if (bConnectedSuccessfully)
+	// Process error first
+	if (!IsTokenValid())
 	{
-		TSharedPtr<FJsonObject> JsonObject;
-		TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-		if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
+		UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. AccessToken has timedout."));
+		OnRefreshTokensResponse.ExecuteIfBound("", false);
+		return;
+	}
+	if (!bConnectedSuccessfully)
+	{
+		UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. Can't connect with server."));
+		OnRefreshTokensResponse.ExecuteIfBound("", false);
+		return;
+	}
+	if (Response->GetResponseCode() > 400)
+	{
+		UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. Response code: %d. Reason: %s."),
+			Response->GetResponseCode(), *Response->GetContentAsString());
+		OnRefreshTokensResponse.ExecuteIfBound("", false);
+		return;
+	}
+	
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
+	{
+		if (JsonObject->HasField("accessToken"))
 		{
-			if (JsonObject->HasField("accessToken"))
-			{
-				AccessToken = JsonObject->GetStringField("accessToken");
-				// Refresh Token TimeToLive time
-				TokenTTL = FDateTime::UtcNow().ToUnixTimestamp() + TokenExpiresIn;
-				
-				OnRefreshTokensResponse.ExecuteIfBound(AccessToken);
-			}
+			AccessToken = JsonObject->GetStringField("accessToken");
+			// Refresh Token TimeToLive time
+			TokenTTL = FDateTime::UtcNow().ToUnixTimestamp() + TokenExpiresIn;
+			
+			OnRefreshTokensResponse.ExecuteIfBound(AccessToken, true);
+		}
+		else
+		{
+			UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. No 'accessToken' field in response."));
+			OnRefreshTokensResponse.ExecuteIfBound("", false);
 		}
 	}
 }

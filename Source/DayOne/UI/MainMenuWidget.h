@@ -47,7 +47,7 @@ private:
 	bool bSearchingForGameSession;
 
 	UFUNCTION()
-	void SetAveragePlayerLatency();
+	void UpdateLatencyUI();
 
 	UFUNCTION()
 	void OnMatchmakingButtonClicked();
