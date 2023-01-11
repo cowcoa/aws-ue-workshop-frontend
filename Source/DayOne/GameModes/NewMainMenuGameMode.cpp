@@ -8,3 +8,14 @@ ANewMainMenuGameMode::ANewMainMenuGameMode()
 {
 	HUDClass = ANewMainMenuHUD::StaticClass();
 }
+
+void ANewMainMenuGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController != nullptr)
+		{
+		PlayerController->SetInputMode(FInputModeUIOnly());
+	}
+}

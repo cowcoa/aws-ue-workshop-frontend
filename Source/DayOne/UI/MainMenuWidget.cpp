@@ -49,7 +49,7 @@ void UMainMenuWidget::NativeConstruct()
 		}
 
 		// Show Cognito Hosted login UI to player.
-		GLClientModule->GameLiftClient->ShowLoginUI(*WebBrowser_Login).BindUObject(this, &ThisClass::OnGLLoginResponse);
+		GLClientModule->GameLiftClient->ShowLoginUI(*WebBrowser_Login).AddUObject(this, &ThisClass::OnGLLoginResponse);
 	}
 }
 
@@ -67,11 +67,13 @@ void UMainMenuWidget::NativeDestruct()
 
 void UMainMenuWidget::UpdateLatencyUI()
 {
+	FString PingString("Latency\n");
 	for (const TPair<FString, float>& Pair : GLClientModule->GameLiftClient->AverageLatencyPerRegion)
 	{
-		FString PingString = FString::Printf(TEXT("%s Latency: %dms\n"), *Pair.Key,  FMath::RoundToInt(Pair.Value));
-		TextBlock_Ping->SetText(FText::FromString(PingString));
+		FString RegionPingString = FString::Printf(TEXT("%s: %dms\n"), *Pair.Key,  FMath::RoundToInt(Pair.Value));
+		PingString += RegionPingString;
 	}
+	TextBlock_Ping->SetText(FText::FromString(PingString));
 }
 
 void UMainMenuWidget::OnMatchmakingButtonClicked()
@@ -111,7 +113,7 @@ void UMainMenuWidget::OnGLLoginResponse(FString AuthzCode)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UMainMenuWidget::OnGLLoginResponse AuthzCode: %s"), *AuthzCode);
 
-	GLClientModule->GameLiftClient->ExchangeCodeToTokens(AuthzCode).BindUObject(this, &ThisClass::OnGLExchangeCodeToTokensResponse);
+	GLClientModule->GameLiftClient->ExchangeCodeToTokens(AuthzCode).AddUObject(this, &ThisClass::OnGLExchangeCodeToTokensResponse);
 }
 
 void UMainMenuWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn)

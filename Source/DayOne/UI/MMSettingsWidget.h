@@ -14,8 +14,12 @@ class DAYONE_API UMMSettingsWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	UMMSettingsWidget(const FObjectInitializer& ObjectInitializer);
+
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UButton* TestButton_1;
@@ -31,4 +35,20 @@ protected:
 	class UButton* TestButton_3;
 	UFUNCTION()
 	void OnTestButton_3Clicked();
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UButton* BackButton;
+	UFUNCTION()
+	void OnBackButton_Clicked();
+
+	//
+	UPROPERTY()
+	TSubclassOf<UUserWidget> LoginWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* LoginWidget;
+
+	class FGameLiftClientModule* GLClientModule;
+	
+	void OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn);
 };

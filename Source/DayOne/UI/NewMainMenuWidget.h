@@ -15,6 +15,8 @@ UCLASS()
 class DAYONE_API UNewMainMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+	UNewMainMenuWidget(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	virtual void NativeConstruct() override;

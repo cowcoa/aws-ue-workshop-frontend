@@ -76,7 +76,10 @@ void UGameLiftClient::OnLoginUrlChanged(const FText& BrowserUrl)
 					{
 						ParameterValue.MidInline(0, ParameterValue.Len() - 1);
 					}
-					OnLoginResponse.ExecuteIfBound(ParameterValue);
+					if (OnLoginResponse.IsBound())
+					{
+						OnLoginResponse.Broadcast(ParameterValue);
+					}
 				}
 			}
 		}
@@ -128,8 +131,11 @@ void UGameLiftClient::OnExchangeCodeToTokensResponseReceived(FHttpRequestPtr Req
 				TokenTTL = FDateTime::UtcNow().ToUnixTimestamp() + TokenExpiresIn;
 
 				UE_LOG(LogGLClient, Warning, TEXT("AccessToken: %s, RefreshToken: %s, ExpiresIn: %d"), *AccessToken, *RefreshToken, TokenExpiresIn);
-				
-				OnExchangeCodeToTokensResponse.ExecuteIfBound(AccessToken, RefreshToken, TokenExpiresIn);
+
+				if (OnExchangeCodeToTokensResponse.IsBound())
+				{
+					OnExchangeCodeToTokensResponse.Broadcast(AccessToken, RefreshToken, TokenExpiresIn);
+				}
 			}
 		}
 		else

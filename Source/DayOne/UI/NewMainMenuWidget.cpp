@@ -6,6 +6,11 @@
 #include "HttpModule.h"
 #include "Interfaces/IHttpResponse.h"
 
+UNewMainMenuWidget::UNewMainMenuWidget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
 void UNewMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -25,7 +30,6 @@ void UNewMainMenuWidget::NativeConstruct()
 		UE_LOG(LogTemp, Warning, TEXT("--- OnExitButtonClicked registered ---"));
 		ExitButton->OnClicked.AddDynamic(this, &ThisClass::OnExitButtonClicked);
 	}
-
 }
 
 void UNewMainMenuWidget::OnPlayButtonClicked()

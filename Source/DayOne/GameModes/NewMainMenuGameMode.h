@@ -16,4 +16,6 @@ class DAYONE_API ANewMainMenuGameMode : public AGameModeBase
 
 public:
 	ANewMainMenuGameMode();
+
+	virtual void BeginPlay() override;
 };
