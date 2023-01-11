@@ -20,7 +20,7 @@ ADayOneGameModeBase::ADayOneGameModeBase()
 
 	HttpModule = &FHttpModule::Get();
 
-	RemainingGameTime = 240;
+	RemainingGameTime = 90;
 	GameSessionActivated = false;
 
 	WaitingForPlayersToJoin = false;
@@ -353,7 +353,8 @@ void ADayOneGameModeBase::CountDownUntilGameOver()
 	if (GameState != nullptr) {
 		ADayOneGameState* DayOneGameState = Cast<ADayOneGameState>(GameState);
 		if (DayOneGameState != nullptr) {
-			DayOneGameState->LatestEvent = FString::FromInt(RemainingGameTime) + " seconds until the game is over";
+			//DayOneGameState->LatestEvent = FString::FromInt(RemainingGameTime) + " seconds until the game is over";
+			DayOneGameState->LatestEvent = FString::FromInt(RemainingGameTime);
 		}
 	}
 

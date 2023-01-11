@@ -37,7 +37,7 @@ void UDayOneWidget::SetTeammateCount()
 		ADayOnePlayerState* OwningDayOnePlayerState = Cast<ADayOnePlayerState>(OwningPlayerState);
 		if (OwningDayOnePlayerState != nullptr) {
 			OwningPlayerTeam = OwningDayOnePlayerState->Team;
-			TextBlock_TeamName->SetText(FText::FromString("Team Name: " + OwningPlayerTeam));
+			TextBlock_TeamName->SetText(FText::FromString("Team: " + OwningPlayerTeam));
 		}
 	}
 
