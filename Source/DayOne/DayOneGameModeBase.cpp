@@ -255,49 +255,70 @@ void ADayOneGameModeBase::PreLogin(const FString& Options, const FString& Addres
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
 
 #if WITH_GAMELIFT
-	if (Options.Len() > 0) {
+	if (Options.Len() > 0)
+	{
 		const FString& PlayerSessionId = UGameplayStatics::ParseOption(Options, "PlayerSessionId");
 		const FString& PlayerId = UGameplayStatics::ParseOption(Options, "PlayerId");
 
-		if (PlayerSessionId.Len() > 0 && PlayerId.Len() > 0) {
+		if (PlayerSessionId.Len() > 0 && PlayerId.Len() > 0)
+		{
 			Aws::GameLift::Server::Model::DescribePlayerSessionsRequest DescribePlayerSessionsRequest;
 			DescribePlayerSessionsRequest.SetPlayerSessionId(TCHAR_TO_ANSI(*PlayerSessionId));
 
 			auto DescribePlayerSessionsOutcome = Aws::GameLift::Server::DescribePlayerSessions(DescribePlayerSessionsRequest);
-			if (DescribePlayerSessionsOutcome.IsSuccess()) {
+			if (DescribePlayerSessionsOutcome.IsSuccess())
+			{
 				auto DescribePlayerSessionsResult = DescribePlayerSessionsOutcome.GetResult();
 				int Count = 1;
 				auto PlayerSessions = DescribePlayerSessionsResult.GetPlayerSessions(Count);
-				if (PlayerSessions != nullptr) {
+				if (PlayerSessions != nullptr)
+				{
 					auto PlayerSession = PlayerSessions[0];
 					FString ExpectedPlayerId = PlayerSession.GetPlayerId();
 					auto PlayerStatus = PlayerSession.GetStatus();
 
-					if (ExpectedPlayerId.Equals(PlayerId) && PlayerStatus == Aws::GameLift::Server::Model::PlayerSessionStatus::RESERVED) {
+					if (ExpectedPlayerId.Equals(PlayerId) && PlayerStatus == Aws::GameLift::Server::Model::PlayerSessionStatus::RESERVED)
+					{
 						auto AcceptPlayerSessionOutcome = Aws::GameLift::Server::AcceptPlayerSession(TCHAR_TO_ANSI(*PlayerSessionId));
-
-						if (!AcceptPlayerSessionOutcome.IsSuccess()) {
-							ErrorMessage = "Unauthorized";
+						if (!AcceptPlayerSessionOutcome.IsSuccess())
+						{
+							ErrorMessage = FString::Printf(TEXT("PlayerSessionId: %s, AcceptPlayerSession Failed: %s"), *PlayerSessionId, ANSI_TO_TCHAR(AcceptPlayerSessionOutcome.GetError().GetErrorMessage()));
 						}
 					}
-					else {
-						ErrorMessage = "Unauthorized";
+					else
+					{
+						if (!ExpectedPlayerId.Equals(PlayerId))
+						{
+							ErrorMessage = FString::Printf(TEXT("Expected Player ID: %s and Player ID: %s doesn't match"), *ExpectedPlayerId, *PlayerId);
+						}
+						else if (PlayerStatus != Aws::GameLift::Server::Model::PlayerSessionStatus::RESERVED)
+						{
+							ErrorMessage = FString::Printf(TEXT("PlayerStatus isn't RESERVED"));
+						}
+						else
+						{
+							ErrorMessage = "Unknown Unauthorized error";
+						}
 					}
 				}
-				else {
-					ErrorMessage = "Unauthorized";
+				else
+				{
+					ErrorMessage = "Failed to get PlayerSession";
 				}
 			}
-			else {
-				ErrorMessage = "Unauthorized";
+			else
+			{
+				ErrorMessage = "Failed to Describe PlayerSession";
 			}
 		}
-		else {
-			ErrorMessage = "Unauthorized";
+		else
+		{
+			ErrorMessage = "Invalid PlayerSessionId or PlayerId";
 		}
 	}
-	else {
-		ErrorMessage = "Unauthorized";
+	else
+	{
+		ErrorMessage = "Invalid Options";
 	}
 #endif
 }

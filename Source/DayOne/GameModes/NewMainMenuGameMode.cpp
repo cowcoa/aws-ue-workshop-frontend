@@ -12,10 +12,10 @@ ANewMainMenuGameMode::ANewMainMenuGameMode()
 void ANewMainMenuGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController != nullptr)
-		{
+	{
 		PlayerController->SetInputMode(FInputModeUIOnly());
 	}
 }

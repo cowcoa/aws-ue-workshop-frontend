@@ -18,6 +18,7 @@ void ADayOneHUD::BeginPlay()
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController != nullptr) {
 		PlayerController->bShowMouseCursor = false;
+		PlayerController->SetInputMode(FInputModeGameAndUI());
 	}
 
 	if (DayOneWidgetClass != nullptr) {

@@ -20,15 +20,8 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-
-	FTimerHandle PollMatchmakingHandle;
-	UFUNCTION()
-	void PollMatchmaking();
 	
-	FTimerHandle UpdateLatencyUIHandle;
-	UFUNCTION()
-	void UpdateLatencyUI();
-
+	// UI binding
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UWebBrowser* WebBrowser_Login;
 
@@ -45,31 +38,30 @@ protected:
 	class UTextBlock* TextBlock_MatchmakingEvent;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UButton* TestButton_1;
+	class UButton* LoginButton;
 	UFUNCTION()
-	void OnTestButton_1Clicked();
+	void OnLoginButtonClicked();
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UButton* TestButton_2;
+	class UButton* JoinButton;
 	UFUNCTION()
-	void OnTestButton_2Clicked();
+	void OnJoinButtonClicked();
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UButton* BackButton;
+private:
+	// Timer
+	FTimerHandle UpdateLatencyUIHandle;
 	UFUNCTION()
-	void OnBackButton_Clicked();
-
-	//
-	UPROPERTY()
-	TSubclassOf<UUserWidget> LoginWidgetClass;
-
-	UPROPERTY()
-	UUserWidget* LoginWidget;
-
+	void UpdateLatencyUI();
+	
+	FTimerHandle PollMatchmakingHandle;
+	UFUNCTION()
+	void PollMatchmaking();
+	
+	// Variables
 	class FGameLiftClientModule* GLClientModule;
-
 	bool bSearchingForGameSession;
 
+	// Callbacks
 	void OnGLLoginResponse(FString AuthzCode);
 	void OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn);
 	void OnGLGetPlayerDataResponse(FString PlayerId, int Wins, int Losses);

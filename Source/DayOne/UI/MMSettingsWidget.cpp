@@ -13,9 +13,6 @@
 UMMSettingsWidget::UMMSettingsWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> LoginWidgetObject(TEXT("/Game/DayOne/UI/WBP_MainMenuWidget"));
-	LoginWidgetClass = LoginWidgetObject.Class;
-
 	GLClientModule = &FGameLiftClientModule::Get();
 	bSearchingForGameSession = false;
 }
@@ -25,21 +22,9 @@ void UMMSettingsWidget::NativeConstruct()
 	Super::NativeConstruct();
 	bIsFocusable = true;
 
-	if (TestButton_1)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--- OnTestButton_1Clicked registered ---"));
-		TestButton_1->OnClicked.AddDynamic(this, &ThisClass::OnTestButton_1Clicked);
-	}
-	if (TestButton_2)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--- OnTestButton_2Clicked registered ---"));
-		TestButton_2->OnClicked.AddDynamic(this, &ThisClass::OnTestButton_2Clicked);
-	}
-	if (BackButton)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--- OnBackButton_Clicked registered ---"));
-		BackButton->OnClicked.AddDynamic(this, &ThisClass::OnBackButton_Clicked);
-	}
+	// Bind button callback
+	LoginButton->OnClicked.AddDynamic(this, &ThisClass::OnLoginButtonClicked);
+	JoinButton->OnClicked.AddDynamic(this, &ThisClass::OnJoinButtonClicked);
 
 	// Setup timer to update latency UI text
 	GetWorld()->GetTimerManager().SetTimer(UpdateLatencyUIHandle, this, &ThisClass::UpdateLatencyUI, 1.0f, true, 1.0f);
@@ -48,24 +33,38 @@ void UMMSettingsWidget::NativeConstruct()
 	// If token still valid we don't need to show login Ui to player. Just update player info to display.
 	if (GLClientModule->GameLiftClient->IsTokenValid())
 	{
-		TestButton_1->SetIsEnabled(false);
-		TestButton_2->SetIsEnabled(true);
+		LoginButton->SetIsEnabled(false);
+		JoinButton->SetIsEnabled(true);
 		GLClientModule->GameLiftClient->GetPlayerData().BindUObject(this, &ThisClass::OnGLGetPlayerDataResponse);
 	}
 	else
 	{
-		TestButton_2->SetIsEnabled(false);
+		JoinButton->SetIsEnabled(false);
 	}
 }
 
 void UMMSettingsWidget::NativeDestruct()
 {
-	if (LoginWidget != nullptr && LoginWidget->IsInViewport())
+	if (bSearchingForGameSession)
 	{
-		LoginWidget->RemoveFromParent();
+		GLClientModule->GameLiftClient->StopMatchmaking();
 	}
 	
+	GetWorld()->GetTimerManager().ClearTimer(PollMatchmakingHandle);
+	GetWorld()->GetTimerManager().ClearTimer(UpdateLatencyUIHandle);
+	
 	Super::NativeDestruct();
+}
+
+void UMMSettingsWidget::UpdateLatencyUI()
+{
+	FString PingString("Latency\n");
+	for (const TPair<FString, float>& Pair : GLClientModule->GameLiftClient->AverageLatencyPerRegion)
+	{
+		FString RegionPingString = FString::Printf(TEXT("%s: %dms\n"), *Pair.Key,  FMath::RoundToInt(Pair.Value));
+		PingString += RegionPingString;
+	}
+	TextBlock_Latency->SetText(FText::FromString(PingString));
 }
 
 void UMMSettingsWidget::PollMatchmaking()
@@ -80,20 +79,10 @@ void UMMSettingsWidget::PollMatchmaking()
 	}
 }
 
-void UMMSettingsWidget::UpdateLatencyUI()
+void UMMSettingsWidget::OnLoginButtonClicked()
 {
-	FString PingString("Latency\n");
-	for (const TPair<FString, float>& Pair : GLClientModule->GameLiftClient->AverageLatencyPerRegion)
-	{
-		FString RegionPingString = FString::Printf(TEXT("%s: %dms\n"), *Pair.Key,  FMath::RoundToInt(Pair.Value));
-		PingString += RegionPingString;
-	}
-	TextBlock_Latency->SetText(FText::FromString(PingString));
-}
-
-void UMMSettingsWidget::OnTestButton_1Clicked()
-{
-	TestButton_1->SetIsEnabled(false);
+	LoginButton->SetIsEnabled(false);
+	
 	// Clean the cookies.
 	IWebBrowserSingleton* WebBrowserSingleton = IWebBrowserModule::Get().GetSingleton();
 	if (WebBrowserSingleton != nullptr) {
@@ -107,10 +96,10 @@ void UMMSettingsWidget::OnTestButton_1Clicked()
 	GLClientModule->GameLiftClient->ShowLoginUI(*WebBrowser_Login).AddUObject(this, &ThisClass::OnGLLoginResponse);
 }
 
-void UMMSettingsWidget::OnTestButton_2Clicked()
+void UMMSettingsWidget::OnJoinButtonClicked()
 {
 	// Disable button to prevent player click it multi times.
-	TestButton_2->SetIsEnabled(false);
+	JoinButton->SetIsEnabled(false);
 
 	// If we are already in searching process, just cancel it.
 	if (bSearchingForGameSession)
@@ -126,14 +115,9 @@ void UMMSettingsWidget::OnTestButton_2Clicked()
 	}
 }
 
-void UMMSettingsWidget::OnBackButton_Clicked()
-{
-
-}
-
 void UMMSettingsWidget::OnGLLoginResponse(FString AuthzCode)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnGLLoginResponse::OnGLLoginResponse AuthzCode: %s"), *AuthzCode);
+	UE_LOG(LogTemp, Warning, TEXT("UMMSettingsWidget::OnGLLoginResponse AuthzCode: %s"), *AuthzCode);
 	GLClientModule->GameLiftClient->ExchangeCodeToTokens(AuthzCode).AddUObject(this, &ThisClass::OnGLExchangeCodeToTokensResponse);
 }
 
@@ -143,12 +127,13 @@ void UMMSettingsWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, FS
 	UE_LOG(LogTemp, Warning, TEXT("RefreshToken: %s"), *RefreshToken);
 	UE_LOG(LogTemp, Warning, TEXT("ExpiresIn: %d"), ExpiresIn);
 
-	// just for FIRE refresh token timer
-	// TODO: change SetCognitoTokens code.
+	// Just for FIRE refresh token timer
 	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance != nullptr) {
+	if (GameInstance != nullptr)
+	{
 		UDayOneGameInstance* DayOneGameInstance = Cast<UDayOneGameInstance>(GameInstance);
-		if (DayOneGameInstance != nullptr) {
+		if (DayOneGameInstance != nullptr)
+		{
 			DayOneGameInstance->SetRefreshTokensTimer();
 		}
 	}
@@ -169,7 +154,7 @@ void UMMSettingsWidget::OnGLGetPlayerDataResponse(FString PlayerId, int Wins, in
 	TextBlock_Score->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), Score)));
 
 	WebBrowser_Login->SetVisibility(ESlateVisibility::Hidden);
-	TestButton_2->SetIsEnabled(true);
+	JoinButton->SetIsEnabled(true);
 }
 
 void UMMSettingsWidget::OnGLStartMatchmakingResponse(FString TicketId)
@@ -179,20 +164,20 @@ void UMMSettingsWidget::OnGLStartMatchmakingResponse(FString TicketId)
 	bSearchingForGameSession = true;
 	GetWorld()->GetTimerManager().SetTimer(PollMatchmakingHandle, this, &ThisClass::PollMatchmaking, 10.0f, true, 3.0f);
 	
-	UTextBlock* ButtonTextBlock = (UTextBlock*)TestButton_2->GetChildAt(0);
+	UTextBlock* ButtonTextBlock = (UTextBlock*)JoinButton->GetChildAt(0);
 	ButtonTextBlock->SetText(FText::FromString("Cancel"));
 	TextBlock_MatchmakingEvent->SetText(FText::FromString("Searching for game session..."));
 
-	TestButton_2->SetIsEnabled(true);
+	JoinButton->SetIsEnabled(true);
 }
 
 void UMMSettingsWidget::OnGLStopMatchmakingResponse()
 {
-	UTextBlock* ButtonTextBlock = (UTextBlock*)TestButton_2->GetChildAt(0);
+	UTextBlock* ButtonTextBlock = (UTextBlock*)JoinButton->GetChildAt(0);
 	ButtonTextBlock->SetText(FText::FromString("Join"));
 	TextBlock_MatchmakingEvent->SetText(FText::FromString(""));
 
-	TestButton_2->SetIsEnabled(true);
+	JoinButton->SetIsEnabled(true);
 }
 
 void UMMSettingsWidget::OnGLPollMatchmakingResponse(FString TicketType,
@@ -208,8 +193,8 @@ void UMMSettingsWidget::OnGLPollMatchmakingResponse(FString TicketType,
 
 		if (TicketType.Equals("MatchmakingSucceeded"))
 		{
-			TestButton_2->SetIsEnabled(false);
-			TextBlock_MatchmakingEvent->SetText(FText::FromString("Successfully found a match. Now connecting to the server..."));
+			JoinButton->SetIsEnabled(false);
+			TextBlock_MatchmakingEvent->SetText(FText::FromString("Game session found. Connecting to game server..."));
 
 			FString LevelName = IpAddress + ":" + Port;
 			const FString& Options = "?PlayerSessionId=" + PlayerSessionId + "?PlayerId=" + PlayerId;
@@ -219,7 +204,7 @@ void UMMSettingsWidget::OnGLPollMatchmakingResponse(FString TicketType,
 		}
 		else
 		{
-			UTextBlock* ButtonTextBlock = (UTextBlock*)TestButton_2->GetChildAt(0);
+			UTextBlock* ButtonTextBlock = (UTextBlock*)JoinButton->GetChildAt(0);
 			ButtonTextBlock->SetText(FText::FromString("Join"));
 			TextBlock_MatchmakingEvent->SetText(FText::FromString(TicketType));
 		}
