@@ -55,11 +55,6 @@ protected:
 	void OnTestButton_2Clicked();
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UButton* TestButton_3;
-	UFUNCTION()
-	void OnTestButton_3Clicked();
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UButton* BackButton;
 	UFUNCTION()
 	void OnBackButton_Clicked();

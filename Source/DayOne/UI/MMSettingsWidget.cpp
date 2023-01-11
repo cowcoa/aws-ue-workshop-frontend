@@ -35,11 +35,6 @@ void UMMSettingsWidget::NativeConstruct()
 		UE_LOG(LogTemp, Warning, TEXT("--- OnTestButton_2Clicked registered ---"));
 		TestButton_2->OnClicked.AddDynamic(this, &ThisClass::OnTestButton_2Clicked);
 	}
-	if (TestButton_3)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--- OnTestButton_3Clicked registered ---"));
-		TestButton_3->OnClicked.AddDynamic(this, &ThisClass::OnTestButton_3Clicked);
-	}
 	if (BackButton)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("--- OnBackButton_Clicked registered ---"));
@@ -131,16 +126,6 @@ void UMMSettingsWidget::OnTestButton_2Clicked()
 	}
 }
 
-void UMMSettingsWidget::OnTestButton_3Clicked()
-{
-	GEngine->AddOnScreenDebugMessage(
-	-1,
-	15.f,
-	FColor::Blue,
-	FString::Printf(TEXT("OnTestButton_3Clicked"))
-);
-}
-
 void UMMSettingsWidget::OnBackButton_Clicked()
 {
 
@@ -196,7 +181,7 @@ void UMMSettingsWidget::OnGLStartMatchmakingResponse(FString TicketId)
 	
 	UTextBlock* ButtonTextBlock = (UTextBlock*)TestButton_2->GetChildAt(0);
 	ButtonTextBlock->SetText(FText::FromString("Cancel"));
-	TextBlock_MatchmakingEvent->SetText(FText::FromString("Currently looking for a match"));
+	TextBlock_MatchmakingEvent->SetText(FText::FromString("Searching for game session..."));
 
 	TestButton_2->SetIsEnabled(true);
 }
@@ -236,7 +221,7 @@ void UMMSettingsWidget::OnGLPollMatchmakingResponse(FString TicketType,
 		{
 			UTextBlock* ButtonTextBlock = (UTextBlock*)TestButton_2->GetChildAt(0);
 			ButtonTextBlock->SetText(FText::FromString("Join"));
-			TextBlock_MatchmakingEvent->SetText(FText::FromString(TicketType + ". Please try again"));
+			TextBlock_MatchmakingEvent->SetText(FText::FromString(TicketType));
 		}
 	}
 }
