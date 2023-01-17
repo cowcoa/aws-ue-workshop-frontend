@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameLiftGameInstance.h"
 #include "Engine/GameInstance.h"
 #include "DayOneGameInstance.generated.h"
 
@@ -10,7 +11,7 @@
  * 
  */
 UCLASS()
-class DAYONE_API UDayOneGameInstance : public UGameInstance
+class DAYONE_API UDayOneGameInstance : public UGameLiftGameInstance
 {
 	GENERATED_BODY()
 

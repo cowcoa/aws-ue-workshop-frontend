@@ -15,8 +15,11 @@ void UDayOneWidget::NativeConstruct()
 
 	GLClientModule = &FGameLiftClientModule::Get();
 
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->SetTeammateCount"));
 	GetWorld()->GetTimerManager().SetTimer(SetTeammateCountHandle, this, &ThisClass::SetTeammateCount, 1.0f, true, 1.0f);
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->SetLatestEvent"));
 	GetWorld()->GetTimerManager().SetTimer(SetLatestEventHandle, this, &ThisClass::SetLatestEvent, 1.0f, true, 1.0f);
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->SetAveragePlayerLatency"));
 	GetWorld()->GetTimerManager().SetTimer(SetAveragePlayerLatencyHandle, this, &ThisClass::SetAveragePlayerLatency, 1.0f, true, 1.0f);
 }
 

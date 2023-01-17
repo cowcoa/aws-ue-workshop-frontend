@@ -11,6 +11,7 @@ UDayOneGameInstance::UDayOneGameInstance()
 
 void UDayOneGameInstance::SetRefreshTokensTimer()
 {
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->RefreshTokens in SetRefreshTokensTimer"));
 	GetWorld()->GetTimerManager().SetTimer(RefreshTokensHandle, this, &UDayOneGameInstance::RefreshTokens, 1.0f, false, GLClientModule->GameLiftClient->TokenExpiresIn - 300);
 }
 
@@ -18,15 +19,20 @@ void UDayOneGameInstance::Init()
 {
 	Super::Init();
 
+#if !WITH_GAMELIFT
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->TestLatency"));
 	GetWorld()->GetTimerManager().SetTimer(TestLatencyHandle, this, &UDayOneGameInstance::TestLatency, 1.0f, true, 1.0f);
+#endif
 }
 
 void UDayOneGameInstance::Shutdown()
 {
 	GetWorld()->GetTimerManager().ClearTimer(RefreshTokensHandle);
 	GetWorld()->GetTimerManager().ClearTimer(TestLatencyHandle);
-	
+
+#if !WITH_GAMELIFT
 	GLClientModule->GameLiftClient->RevokeTokens();
+#endif
 	
 	Super::Shutdown();
 }
@@ -51,6 +57,7 @@ void UDayOneGameInstance::OnGLRefreshTokensResponse(FString AccessToken, bool bI
 	else
 	{
 		// Set faster timer
+		UE_LOG(LogTemp, Warning, TEXT("SetTimer->RefreshTokens in OnGLRefreshTokensResponse"));
 		GetWorld()->GetTimerManager().SetTimer(RefreshTokensHandle, this, &UDayOneGameInstance::RefreshTokens, 1.0f, false, 30.0f);
 	}
 }

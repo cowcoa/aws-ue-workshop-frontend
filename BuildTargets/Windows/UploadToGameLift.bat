@@ -38,7 +38,7 @@ ECHO New Build Id is %BUILD_ID%
 echo.
 
 echo Create fleet based on new Build Id...
-aws gamelift create-fleet --name DayOne-%NEW_BUILD_VERSION% --build-id %BUILD_ID% --ec2-instance-type "c5.xlarge" --fleet-type ON_DEMAND --ec2-inbound-permissions "FromPort=7777,ToPort=7777,IpRange=0.0.0.0/0,Protocol=UDP" --runtime-configuration "ServerProcesses=[{LaunchPath=C:\game\DayOne\Binaries\Win64\DayOneServer.exe,Parameters=-port=7777 -password=dummy,ConcurrentExecutions=2}]"
+aws gamelift create-fleet --name DayOne-%NEW_BUILD_VERSION% --build-id %BUILD_ID% --ec2-instance-type "c5.xlarge" --fleet-type ON_DEMAND --ec2-inbound-permissions "FromPort=7777,ToPort=7777,IpRange=0.0.0.0/0,Protocol=UDP" "FromPort=3389,ToPort=3389,IpRange=0.0.0.0/0,Protocol=TCP" --runtime-configuration "ServerProcesses=[{LaunchPath=C:\game\DayOne\Binaries\Win64\DayOneServer.exe,Parameters=-log=..\..\Binaries\Win64\DayOneGameLift.log -port=7777,ConcurrentExecutions=2}]"
 echo.
 
 pause

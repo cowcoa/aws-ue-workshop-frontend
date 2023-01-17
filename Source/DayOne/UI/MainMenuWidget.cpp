@@ -28,6 +28,7 @@ void UMainMenuWidget::NativeConstruct()
 	// Register handler to process matchmaking button clicked.
 	Button_Matchmaking->OnClicked.AddUniqueDynamic(this, &ThisClass::OnMatchmakingButtonClicked);
 	// Setup timer to update latency UI text
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->UpdateLatencyUI"));
 	GetWorld()->GetTimerManager().SetTimer(UpdateLatencyUIHandle, this, &UMainMenuWidget::UpdateLatencyUI, 1.0f, true, 1.0f);
 
 	// Check if Cognito token is valid.
@@ -161,6 +162,7 @@ void UMainMenuWidget::OnGLStartMatchmakingResponse(FString TicketId)
 	UE_LOG(LogTemp, Warning, TEXT("TicketId: %s"), *TicketId);
 
 	bSearchingForGameSession = true;
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->PollMatchmakingHandle"));
 	GetWorld()->GetTimerManager().SetTimer(PollMatchmakingHandle, this, &UMainMenuWidget::PollMatchmaking, 10.0f, true, 3.0f);
 	
 	UTextBlock* ButtonTextBlock = (UTextBlock*)Button_Matchmaking->GetChildAt(0);

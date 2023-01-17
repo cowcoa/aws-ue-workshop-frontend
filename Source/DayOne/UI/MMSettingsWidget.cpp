@@ -27,6 +27,7 @@ void UMMSettingsWidget::NativeConstruct()
 	JoinButton->OnClicked.AddDynamic(this, &ThisClass::OnJoinButtonClicked);
 
 	// Setup timer to update latency UI text
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->UpdateLatencyUI"));
 	GetWorld()->GetTimerManager().SetTimer(UpdateLatencyUIHandle, this, &ThisClass::UpdateLatencyUI, 1.0f, true, 1.0f);
 
 	// Check if Cognito token is valid.
@@ -162,6 +163,7 @@ void UMMSettingsWidget::OnGLStartMatchmakingResponse(FString TicketId)
 	UE_LOG(LogTemp, Warning, TEXT("TicketId: %s"), *TicketId);
 
 	bSearchingForGameSession = true;
+	UE_LOG(LogTemp, Warning, TEXT("SetTimer->PollMatchmaking"));
 	GetWorld()->GetTimerManager().SetTimer(PollMatchmakingHandle, this, &ThisClass::PollMatchmaking, 10.0f, true, 3.0f);
 	
 	UTextBlock* ButtonTextBlock = (UTextBlock*)JoinButton->GetChildAt(0);
