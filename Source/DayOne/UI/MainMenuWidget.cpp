@@ -10,7 +10,7 @@
 #include "IWebBrowserSingleton.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "DayOne/DayOneGameInstance.h"
+#include "DayOne/GameInstance/DayOneGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 UMainMenuWidget::UMainMenuWidget(const FObjectInitializer& ObjectInitializer)

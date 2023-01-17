@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DayOneGameInstance.h"
 #include "GameLiftClientModule.h"
 
@@ -12,6 +11,7 @@ UDayOneGameInstance::UDayOneGameInstance()
 void UDayOneGameInstance::SetRefreshTokensTimer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("SetTimer->RefreshTokens in SetRefreshTokensTimer"));
+	// Refresh new tokens 5 minutes before the tokens expire.
 	GetWorld()->GetTimerManager().SetTimer(RefreshTokensHandle, this, &UDayOneGameInstance::RefreshTokens, 1.0f, false, GLClientModule->GameLiftClient->TokenExpiresIn - 300);
 }
 

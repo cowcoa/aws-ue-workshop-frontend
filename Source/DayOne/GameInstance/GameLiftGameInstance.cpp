@@ -17,16 +17,20 @@ void UGameLiftGameInstance::OnStart()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("OnHealthCheck"));
 			
-			FHealthCheckStateNew* OutputState = (FHealthCheckStateNew*)State;
-			OutputState->bIsHealthy = true;
-
-			return OutputState->bIsHealthy;
+			return true;
 		};
 		
 		// OnStartGameSession callback
 		auto OnStartGameSession = [](Aws::GameLift::Server::Model::GameSession GameSession, OUT void* State)
 		{
-			FStartGameSessionStateNew* OutputState = (FStartGameSessionStateNew*)State;
+			UE_LOG(LogTemp, Warning, TEXT("Get OnStartGameSession called from GameLift service"));
+			
+			FStartGameSessionState* OutputState = (FStartGameSessionState*)State;
+			if (OutputState == nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("FStartGameSessionState object is NULL"));
+				return;
+			}
 
 			// https://docs.aws.amazon.com/gamelift/latest/flexmatchguide/match-server.html#match-server-data
 			FString MatchmakerData = GameSession.GetMatchmakerData();
@@ -49,7 +53,7 @@ void UGameLiftGameInstance::OnStart()
 						FGameLiftPlayer GameSessionPlayer;
 						GameSessionPlayer.TeamName = TeamName;
 						GameSessionPlayer.PlayerId = PlayerId;
-						OutputState->PlayerMap.Add(PlayerId, GameSessionPlayer);
+						OutputState->ReservedPlayers.Add(PlayerId, GameSessionPlayer);
 					}
 				}
 
@@ -61,7 +65,8 @@ void UGameLiftGameInstance::OnStart()
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Failed to ActivateGameSession"));
+					OutputState->ReservedPlayers.Empty();
+					UE_LOG(LogTemp, Warning, TEXT("Failed to ActivateGameSession: %s"), ANSI_TO_TCHAR(ActiveGameSessionOutcome.GetError().GetErrorMessage()));
 				}
 			}
 			else
@@ -73,7 +78,15 @@ void UGameLiftGameInstance::OnStart()
 		// OnProcessTerminate callback
 		auto OnProcessTerminate = [](OUT void* State)
 		{
-			FProcessTerminateStateNew* OutputState = (FProcessTerminateStateNew*)State;
+			UE_LOG(LogTemp, Warning, TEXT("Get OnProcessTerminate called from GameLift service"));
+			
+			FProcessTerminateState* OutputState = (FProcessTerminateState*)State;
+			if (OutputState == nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("FProcessTerminateState object is NULL"));
+				return;
+			}
+			
 			OutputState->bIsTerminating = true;
 
 			auto TerminationTimeOutcome = Aws::GameLift::Server::GetTerminationTime();
@@ -106,6 +119,10 @@ void UGameLiftGameInstance::OnStart()
 		}
 
 		// Setup logfile path.
+		// TODO: We need wildcard log file names!
+		// UnrealEngine renames the log files by current date when the dedicated server process exits,
+		// so the log file name are dynamically changing,
+		// but the Server SDK’s LogParameters seem to only allow static file names to be specified?
 		const char* LogFile = "DayOneGameLift.log";
 		const char** LogFiles = &LogFile;
 		auto LogParams = new Aws::GameLift::Server::LogParameters(LogFiles, 1);
@@ -118,7 +135,7 @@ void UGameLiftGameInstance::OnStart()
 			OnProcessTerminate,
 			&ProcessTerminateState,
 			OnHealthCheck,
-			&HealthCheckState,
+			nullptr,
 			Port,
 			*LogParams
 		);
@@ -127,12 +144,12 @@ void UGameLiftGameInstance::OnStart()
 		auto ProcessReadyOutcome = Aws::GameLift::Server::ProcessReady(*ProcessParams);
 		if (!ProcessReadyOutcome.IsSuccess())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to call GameLift ProcessReady"));
+			UE_LOG(LogTemp, Warning, TEXT("Failed to call GameLift ProcessReady: %s"), ANSI_TO_TCHAR(ProcessReadyOutcome.GetError().GetErrorMessage()));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to init GameLiftServerSDK"));
+		UE_LOG(LogTemp, Warning, TEXT("Failed to init GameLiftServerSDK: %s"), ANSI_TO_TCHAR(InitSDKOutcome.GetError().GetErrorMessage()));
 	}
 #endif
 }

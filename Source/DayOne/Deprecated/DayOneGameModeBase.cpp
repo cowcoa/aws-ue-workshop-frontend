@@ -3,11 +3,11 @@
 
 #include "DayOneGameModeBase.h"
 
-#include "Components/TextFileReaderComponent.h"
-#include "GameStates/DayOneGameState.h"
-#include "HUD/DayOneHUD.h"
+#include "../Components/TextFileReaderComponent.h"
+#include "../GameStates/DayOneGameState.h"
+#include "../HUD/DayOneHUD.h"
 #include "Kismet/GameplayStatics.h"
-#include "PlayerStates/DayOnePlayerState.h"
+#include "../PlayerStates/DayOnePlayerState.h"
 
 ADayOneGameModeBase::ADayOneGameModeBase()
 {
@@ -43,7 +43,7 @@ void ADayOneGameModeBase::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("=== GameLift::OnStartGameSession ==="));
 			
-			FStartGameSessionState* State = (FStartGameSessionState*)Params;
+			FStartGameSessionStateOld* State = (FStartGameSessionStateOld*)Params;
 
 			State->Status = Aws::GameLift::Server::ActivateGameSession().IsSuccess();
 
@@ -87,7 +87,7 @@ void ADayOneGameModeBase::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("=== GameLift::OnUpdateGameSession ==="));
 			
-			FUpdateGameSessionState* State = (FUpdateGameSessionState*)Params;
+			FUpdateGameSessionStateOld* State = (FUpdateGameSessionStateOld*)Params;
 
 			auto Reason = UpdateGameSessionObj.GetUpdateReason();
 
@@ -147,7 +147,7 @@ void ADayOneGameModeBase::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("=== GameLift::OnProcessTerminate ==="));
 			
-			FProcessTerminateState* State = (FProcessTerminateState*)Params;
+			FProcessTerminateStateOld* State = (FProcessTerminateStateOld*)Params;
 
 			auto GetTerminationTimeOutcome = Aws::GameLift::Server::GetTerminationTime();
 			if (GetTerminationTimeOutcome.IsSuccess()) {
@@ -159,7 +159,7 @@ void ADayOneGameModeBase::BeginPlay()
 
 		auto OnHealthCheck = [](void* Params)
 		{
-			FHealthCheckState* State = (FHealthCheckState*)Params;
+			FHealthCheckStateOld* State = (FHealthCheckStateOld*)Params;
 			State->Status = true;
 
 			return State->Status;

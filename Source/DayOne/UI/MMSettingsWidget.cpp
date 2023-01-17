@@ -5,7 +5,7 @@
 #include "WebBrowserModule.h"
 #include "IWebBrowserSingleton.h"
 #include "GameLiftClientModule.h"
-#include "DayOne/DayOneGameInstance.h"
+#include "DayOne/GameInstance/DayOneGameInstance.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"

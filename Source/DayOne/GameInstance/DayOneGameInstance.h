@@ -17,14 +17,7 @@ class DAYONE_API UDayOneGameInstance : public UGameLiftGameInstance
 
 public:
 	UDayOneGameInstance();
-
-	UPROPERTY()
-	FTimerHandle RefreshTokensHandle;
-
-	UPROPERTY()
-	FTimerHandle TestLatencyHandle;
-
-	UFUNCTION()
+	
 	void SetRefreshTokensTimer();
 
 protected:
@@ -34,12 +27,15 @@ protected:
 private:
 	class FGameLiftClientModule* GLClientModule;
 
+	// Timer
+	FTimerHandle RefreshTokensHandle;
 	UFUNCTION()
 	void RefreshTokens();
-
+	
+	FTimerHandle TestLatencyHandle;
 	UFUNCTION()
 	void TestLatency();
 	
-	//
+	// Callback
 	void OnGLRefreshTokensResponse(FString AccessToken, bool bIsSuccessful);
 };

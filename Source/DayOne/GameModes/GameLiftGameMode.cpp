@@ -3,7 +3,7 @@
 
 #include "GameLiftGameMode.h"
 #include "GameLiftServerSDK.h"
-#include "DayOne/DayOneGameInstance.h"
+#include "DayOne/GameInstance/DayOneGameInstance.h"
 #include "DayOne/GameStates/DayOneGameState.h"
 #include "DayOne/HUD/DayOneHUD.h"
 #include "DayOne/PlayerStates/DayOnePlayerState.h"
@@ -60,7 +60,7 @@ FString AGameLiftGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 				DayOnePlayerState->PlayerSessionId = *PlayerSessionId;
 				DayOnePlayerState->MatchmakingPlayerId = *PlayerId;
 
-				const FGameLiftPlayer* GameSessionPlayer = StartGameSessionState.PlayerMap.Find(PlayerId);
+				const FGameLiftPlayer* GameSessionPlayer = StartGameSessionState.ReservedPlayers.Find(PlayerId);
 				if (GameSessionPlayer != nullptr)
 				{
 					DayOnePlayerState->Team = GameSessionPlayer->TeamName;
@@ -160,10 +160,13 @@ void AGameLiftGameMode::Logout(AController* Exiting)
 		if (PlayerState != nullptr)
 		{
 			ADayOnePlayerState* DayOnePlayerState = Cast<ADayOnePlayerState>(PlayerState);
-			const FString& PlayerSessionId = DayOnePlayerState->PlayerSessionId;
-			if (PlayerSessionId.Len() > 0)
+			if (DayOnePlayerState != nullptr)
 			{
-				Aws::GameLift::Server::RemovePlayerSession(TCHAR_TO_ANSI(*PlayerSessionId));
+				const FString& PlayerSessionId = DayOnePlayerState->PlayerSessionId;
+				if (PlayerSessionId.Len() > 0)
+				{
+					Aws::GameLift::Server::RemovePlayerSession(TCHAR_TO_ANSI(*PlayerSessionId));
+				}
 			}
 		}
 	}
@@ -212,6 +215,7 @@ void AGameLiftGameMode::CountdownToGameOver()
 			else
 			{
 				DayOneGameState->LatestEvent = "Game Over";
+				// We must clear the CountdownToGameOver timer here. Because this timer is faster than EndGame timer.
 				GetWorldTimerManager().ClearTimer(CountdownToGameOverHandle);
 				UE_LOG(LogTemp, Warning, TEXT("SetTimer->EndGame in CountdownToGameOver"));
 				GetWorldTimerManager().SetTimer(EndGameHandle, this, &ThisClass::EndGame, 1.0f, false, 5.0f);
@@ -263,22 +267,16 @@ void AGameLiftGameMode::EndGame()
 	FGenericPlatformMisc::RequestExit(false);
 }
 
-void AGameLiftGameMode::OnStartGameSession(const FStartGameSessionStateNew& State)
+void AGameLiftGameMode::OnStartGameSession(const FStartGameSessionState& State)
 {
 	// !NOTE!: Never call GetWorldTimerManager().SetTimer here.
 	// !This functions was called from Non-Game thread!
-	
 	StartGameSessionState = State;
-	//UE_LOG(LogTemp, Warning, TEXT("SetTimer->CountdownToGameOver"));
-	//GetWorldTimerManager().SetTimer(CountdownToGameOverHandle, this, &ThisClass::CountdownToGameOver, 1.0f, true, 0.0f);
 }
 
-void AGameLiftGameMode::OnProcessTerminate(const FProcessTerminateStateNew& State)
+void AGameLiftGameMode::OnProcessTerminate(const FProcessTerminateState& State)
 {
 	// !NOTE!: Never call GetWorldTimerManager().SetTimer here.
 	// !This functions was called from Non-Game thread!
-	
 	ProcessTerminateState = State;
-	//UE_LOG(LogTemp, Warning, TEXT("SetTimer->ProcessTermination"));
-	//GetWorldTimerManager().SetTimer(ProcessTerminationHandle, this, &ThisClass::ProcessTermination, 10.0f, true, 1.0f);
 }

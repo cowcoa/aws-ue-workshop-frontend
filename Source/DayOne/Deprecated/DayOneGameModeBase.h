@@ -21,7 +21,7 @@ enum class EUpdateReason : uint8
 };
 
 USTRUCT()
-struct FStartGameSessionState
+struct FStartGameSessionStateOld
 {
 	GENERATED_BODY();
 
@@ -33,13 +33,13 @@ struct FStartGameSessionState
 
 	TMap<FString, Aws::GameLift::Server::Model::Player> PlayerIdToPlayer;
 
-	FStartGameSessionState() {
+	FStartGameSessionStateOld() {
 		Status = false;
 	}
 };
 
 USTRUCT()
-struct FUpdateGameSessionState
+struct FUpdateGameSessionStateOld
 {
 	GENERATED_BODY();
 
@@ -48,13 +48,13 @@ struct FUpdateGameSessionState
 
 	TMap<FString, Aws::GameLift::Server::Model::Player> PlayerIdToPlayer;
 
-	FUpdateGameSessionState() {
+	FUpdateGameSessionStateOld() {
 		Reason = EUpdateReason::NO_UPDATE_RECEIVED;
 	}
 };
 
 USTRUCT()
-struct FProcessTerminateState
+struct FProcessTerminateStateOld
 {
 	GENERATED_BODY();
 
@@ -63,21 +63,21 @@ struct FProcessTerminateState
 
 	long TerminationTime;
 
-	FProcessTerminateState() {
+	FProcessTerminateStateOld() {
 		Status = false;
 		TerminationTime = 0L;
 	}
 };
 
 USTRUCT()
-struct FHealthCheckState
+struct FHealthCheckStateOld
 {
 	GENERATED_BODY();
 
 	UPROPERTY()
 	bool Status;
 
-	FHealthCheckState() {
+	FHealthCheckStateOld() {
 		Status = false;
 	}
 };
@@ -122,16 +122,16 @@ private:
 	// 
 	
 	UPROPERTY()
-	FStartGameSessionState StartGameSessionState;
+	FStartGameSessionStateOld StartGameSessionState;
 
 	UPROPERTY()
-	FUpdateGameSessionState UpdateGameSessionState;
+	FUpdateGameSessionStateOld UpdateGameSessionState;
 
 	UPROPERTY()
-	FProcessTerminateState ProcessTerminateState;
+	FProcessTerminateStateOld ProcessTerminateState;
 
 	UPROPERTY()
-	FHealthCheckState HealthCheckState;
+	FHealthCheckStateOld HealthCheckState;
 
 	//
 	UPROPERTY()

@@ -6,8 +6,8 @@
 #include "Engine/GameInstance.h"
 #include "GameLiftGameInstance.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnStartGameSessionDelegate, const struct FStartGameSessionStateNew& /*StartGameSessionState*/);
-DECLARE_DELEGATE_OneParam(FOnProcessTerminateDelegate, const struct FProcessTerminateStateNew& /*ProcessTerminateState*/);
+DECLARE_DELEGATE_OneParam(FOnStartGameSessionDelegate, const struct FStartGameSessionState& /*StartGameSessionState*/);
+DECLARE_DELEGATE_OneParam(FOnProcessTerminateDelegate, const struct FProcessTerminateState& /*ProcessTerminateState*/);
 
 USTRUCT()
 struct FGameLiftPlayer
@@ -19,44 +19,30 @@ struct FGameLiftPlayer
 };
 
 USTRUCT()
-struct FHealthCheckStateNew
-{
-	GENERATED_BODY();
-	
-	bool bIsHealthy;
-
-	FHealthCheckStateNew() {
-		bIsHealthy = false;
-	}
-};
-
-USTRUCT()
-struct FStartGameSessionStateNew
+struct FStartGameSessionState
 {
 	GENERATED_BODY();
 	
 	bool bIsSuccess;
-	TMap<FString, FGameLiftPlayer> PlayerMap;
-
+	TMap<FString, FGameLiftPlayer> ReservedPlayers;
 	FOnStartGameSessionDelegate OnStartGameSession;
 
-	FStartGameSessionStateNew()
+	FStartGameSessionState()
 	{
 		bIsSuccess = false;
 	}
 };
 
 USTRUCT()
-struct FProcessTerminateStateNew
+struct FProcessTerminateState
 {
 	GENERATED_BODY();
 	
 	bool bIsTerminating;
 	long TerminationTime;
-
 	FOnProcessTerminateDelegate OnProcessTerminate;
 
-	FProcessTerminateStateNew()
+	FProcessTerminateState()
 	{
 		bIsTerminating = false;
 		TerminationTime = 0L;
@@ -73,8 +59,7 @@ class DAYONE_API UGameLiftGameInstance : public UGameInstance
 
 public:
 	virtual void OnStart() override;
-
-	FHealthCheckStateNew HealthCheckState;
-	FStartGameSessionStateNew StartGameSessionState;
-	FProcessTerminateStateNew ProcessTerminateState;
+	
+	FStartGameSessionState StartGameSessionState;
+	FProcessTerminateState ProcessTerminateState;
 };

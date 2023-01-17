@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DayOne/GameLiftGameInstance.h"
+#include "DayOne/GameInstance/GameLiftGameInstance.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameLiftGameMode.generated.h"
 
@@ -33,8 +33,8 @@ protected:
 	virtual void Logout(AController* Exiting) override;
 
 private:
-	// Max game time
 	EGameSessionState GameSessionState;
+	// Max game time
 	int RemainingGameTime;
 	
 	// Timer
@@ -55,8 +55,8 @@ private:
 	void EndGame();
 
 	// Callback
-	FStartGameSessionStateNew StartGameSessionState;
-	void OnStartGameSession(const FStartGameSessionStateNew& State);
-	FProcessTerminateStateNew ProcessTerminateState;
-	void OnProcessTerminate(const FProcessTerminateStateNew& State);
+	FStartGameSessionState StartGameSessionState;
+	void OnStartGameSession(const FStartGameSessionState& State);
+	FProcessTerminateState ProcessTerminateState;
+	void OnProcessTerminate(const FProcessTerminateState& State);
 };

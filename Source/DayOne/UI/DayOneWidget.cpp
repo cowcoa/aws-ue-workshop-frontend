@@ -5,7 +5,7 @@
 
 #include "GameLiftClientModule.h"
 #include "Components/TextBlock.h"
-#include "DayOne/DayOneGameInstance.h"
+#include "DayOne/GameInstance/DayOneGameInstance.h"
 #include "DayOne/GameStates/DayOneGameState.h"
 #include "DayOne/PlayerStates/DayOnePlayerState.h"
 
