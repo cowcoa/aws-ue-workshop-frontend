@@ -13,6 +13,19 @@ if not exist WindowsServer\VC_Redist_2022_x64.exe (
     timeout 10
     exit /b -1
 )
+:: GameLift Server SDK 5.0.0 need libcrypto and libssl. You don't need there files if you are using 4.x SDK.
+copy /y Prerequisites\libcrypto-3-x64.dll.bak WindowsServer\DayOne\Binaries\Win64\libcrypto-3-x64.dll
+if not exist WindowsServer\DayOne\Binaries\Win64\libcrypto-3-x64.dll (
+    echo "libcrypto-3-x64.dll does not exist in WindowsServer\DayOne\Binaries\Win64 folder."
+    timeout 10
+    exit /b -1
+)
+copy /y Prerequisites\libssl-3-x64.dll.bak WindowsServer\DayOne\Binaries\Win64\libssl-3-x64.dll
+if not exist WindowsServer\DayOne\Binaries\Win64\libssl-3-x64.dll (
+    echo "libssl-3-x64.dll does not exist in WindowsServer\DayOne\Binaries\Win64 folder."
+    timeout 10
+    exit /b -1
+)
 echo.
 
 echo Fetch DayOne's latest Build Version in GameLift...
