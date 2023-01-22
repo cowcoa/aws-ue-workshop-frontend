@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "MMSettingsWidget.generated.h"
+#include "MultiplayerWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DAYONE_API UMMSettingsWidget : public UUserWidget
+class DAYONE_API UMultiplayerWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	UMMSettingsWidget(const FObjectInitializer& ObjectInitializer);
+	UMultiplayerWidget(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	virtual void NativeConstruct() override;

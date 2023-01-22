@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "MMSettingsWidget.h"
+#include "MultiplayerWidget.h"
 #include "IWebBrowserCookieManager.h"
 #include "WebBrowserModule.h"
 #include "IWebBrowserSingleton.h"
@@ -10,14 +10,14 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
-UMMSettingsWidget::UMMSettingsWidget(const FObjectInitializer& ObjectInitializer)
+UMultiplayerWidget::UMultiplayerWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	GLClientModule = &FGameLiftClientModule::Get();
 	bSearchingForGameSession = false;
 }
 
-void UMMSettingsWidget::NativeConstruct()
+void UMultiplayerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	bIsFocusable = true;
@@ -44,7 +44,7 @@ void UMMSettingsWidget::NativeConstruct()
 	}
 }
 
-void UMMSettingsWidget::NativeDestruct()
+void UMultiplayerWidget::NativeDestruct()
 {
 	if (bSearchingForGameSession)
 	{
@@ -57,7 +57,7 @@ void UMMSettingsWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UMMSettingsWidget::UpdateLatencyUI()
+void UMultiplayerWidget::UpdateLatencyUI()
 {
 	FString PingString("Latency\n");
 	for (const TPair<FString, float>& Pair : GLClientModule->GameLiftClient->AverageLatencyPerRegion)
@@ -68,7 +68,7 @@ void UMMSettingsWidget::UpdateLatencyUI()
 	TextBlock_Latency->SetText(FText::FromString(PingString));
 }
 
-void UMMSettingsWidget::PollMatchmaking()
+void UMultiplayerWidget::PollMatchmaking()
 {
 	if (bSearchingForGameSession)
 	{
@@ -80,7 +80,7 @@ void UMMSettingsWidget::PollMatchmaking()
 	}
 }
 
-void UMMSettingsWidget::OnLoginButtonClicked()
+void UMultiplayerWidget::OnLoginButtonClicked()
 {
 	LoginButton->SetIsEnabled(false);
 	
@@ -97,7 +97,7 @@ void UMMSettingsWidget::OnLoginButtonClicked()
 	GLClientModule->GameLiftClient->ShowLoginUI(*WebBrowser_Login).AddUObject(this, &ThisClass::OnGLLoginResponse);
 }
 
-void UMMSettingsWidget::OnJoinButtonClicked()
+void UMultiplayerWidget::OnJoinButtonClicked()
 {
 	// Disable button to prevent player click it multi times.
 	JoinButton->SetIsEnabled(false);
@@ -116,13 +116,13 @@ void UMMSettingsWidget::OnJoinButtonClicked()
 	}
 }
 
-void UMMSettingsWidget::OnGLLoginResponse(FString AuthzCode)
+void UMultiplayerWidget::OnGLLoginResponse(FString AuthzCode)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UMMSettingsWidget::OnGLLoginResponse AuthzCode: %s"), *AuthzCode);
 	GLClientModule->GameLiftClient->ExchangeCodeToTokens(AuthzCode).AddUObject(this, &ThisClass::OnGLExchangeCodeToTokensResponse);
 }
 
-void UMMSettingsWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn)
+void UMultiplayerWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn)
 {
 	UE_LOG(LogTemp, Warning, TEXT("AccessToken: %s"), *AccessToken);
 	UE_LOG(LogTemp, Warning, TEXT("RefreshToken: %s"), *RefreshToken);
@@ -142,7 +142,7 @@ void UMMSettingsWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, FS
 	GLClientModule->GameLiftClient->GetPlayerData().BindUObject(this, &ThisClass::OnGLGetPlayerDataResponse);
 }
 
-void UMMSettingsWidget::OnGLGetPlayerDataResponse(FString PlayerId, int Wins, int Losses)
+void UMultiplayerWidget::OnGLGetPlayerDataResponse(FString PlayerId, int Wins, int Losses)
 {
 	UE_LOG(LogTemp, Warning, TEXT("PlayerId: %s, Wins: %d, Losses: %d"), *PlayerId, Wins, Losses);
 
@@ -158,7 +158,7 @@ void UMMSettingsWidget::OnGLGetPlayerDataResponse(FString PlayerId, int Wins, in
 	JoinButton->SetIsEnabled(true);
 }
 
-void UMMSettingsWidget::OnGLStartMatchmakingResponse(FString TicketId)
+void UMultiplayerWidget::OnGLStartMatchmakingResponse(FString TicketId)
 {
 	UE_LOG(LogTemp, Warning, TEXT("TicketId: %s"), *TicketId);
 
@@ -173,7 +173,7 @@ void UMMSettingsWidget::OnGLStartMatchmakingResponse(FString TicketId)
 	JoinButton->SetIsEnabled(true);
 }
 
-void UMMSettingsWidget::OnGLStopMatchmakingResponse()
+void UMultiplayerWidget::OnGLStopMatchmakingResponse()
 {
 	UTextBlock* ButtonTextBlock = (UTextBlock*)JoinButton->GetChildAt(0);
 	ButtonTextBlock->SetText(FText::FromString("Join"));
@@ -182,7 +182,7 @@ void UMMSettingsWidget::OnGLStopMatchmakingResponse()
 	JoinButton->SetIsEnabled(true);
 }
 
-void UMMSettingsWidget::OnGLPollMatchmakingResponse(FString TicketType,
+void UMultiplayerWidget::OnGLPollMatchmakingResponse(FString TicketType,
 	                                                FString PlayerId, FString PlayerSessionId,
 	                                                FString IpAddress, FString Port)
 {
