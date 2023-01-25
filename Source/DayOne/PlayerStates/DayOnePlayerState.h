@@ -15,14 +15,10 @@ class DAYONE_API ADayOnePlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
-	FString PlayerSessionId;
-
-	UPROPERTY()
-	FString MatchmakingPlayerId;
-
 	UPROPERTY(Replicated)
-	FString Team;
+	FString PlayerGameId;
+	UPROPERTY(Replicated)
+	FString TeamName;
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;

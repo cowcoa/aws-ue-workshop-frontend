@@ -4,6 +4,7 @@
 #include "MainMenuLevelScriptActor.h"
 
 #include "Blueprint/UserWidget.h"
+#include "DayOne/DayOne.h"
 #include "Kismet/GameplayStatics.h"
 
 void AMainMenuLevelScriptActor::BeginPlay()
@@ -12,7 +13,7 @@ void AMainMenuLevelScriptActor::BeginPlay()
 
 	if (!GetGameInstance()->IsDedicatedServerInstance())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AMainMenuLevelScriptActor::BeginPlay"));
+		UE_LOG(LogDayOne, Warning, TEXT("AMainMenuLevelScriptActor::BeginPlay"));
 
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 		if (PlayerController)

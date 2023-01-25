@@ -9,6 +9,6 @@ void ADayOneGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, LatestEvent);
-	DOREPLIFETIME(ThisClass, WinningTeam);
+	DOREPLIFETIME(ThisClass, GameMessage);
+	DOREPLIFETIME(ThisClass, GameOverCountDown);
 }

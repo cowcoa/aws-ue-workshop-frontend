@@ -3,6 +3,7 @@
 
 #include "GameLiftGameMode.h"
 #include "GameLiftServerSDK.h"
+#include "DayOne/DayOne.h"
 #include "DayOne/GameInstance/DayOneGameInstance.h"
 #include "DayOne/GameStates/DayOneGameState.h"
 #include "DayOne/HUD/DayOneHUD.h"
@@ -35,7 +36,7 @@ void AGameLiftGameMode::BeginPlay()
 			DayOneGameInstance->ProcessTerminateState.OnProcessTerminate.BindUObject(this, &ThisClass::OnProcessTerminate);
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("SetTimer->GuardGameSession"));
+	UE_LOG(LogDayOne, Warning, TEXT("SetTimer->GuardGameSession"));
 	GetWorldTimerManager().SetTimer(GuardGameSessionHandle, this, &ThisClass::GuardGameSession, 1.0f, true, 1.0f);
 #endif
 }
@@ -57,13 +58,13 @@ FString AGameLiftGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 			ADayOnePlayerState* DayOnePlayerState = Cast<ADayOnePlayerState>(PlayerState);
 			if (DayOnePlayerState != nullptr)
 			{
-				DayOnePlayerState->PlayerSessionId = *PlayerSessionId;
-				DayOnePlayerState->MatchmakingPlayerId = *PlayerId;
+				DayOnePlayerState->PlayerGameId = PlayerId;
 
-				const FGameLiftPlayer* GameSessionPlayer = StartGameSessionState.ReservedPlayers.Find(PlayerId);
-				if (GameSessionPlayer != nullptr)
+				FGameLiftPlayer* GameLiftPlayer = StartGameSessionState.ReservedPlayers.Find(PlayerId);
+				if (GameLiftPlayer != nullptr)
 				{
-					DayOnePlayerState->Team = GameSessionPlayer->TeamName;
+					GameLiftPlayer->PlayerSessionId = PlayerSessionId;
+					DayOnePlayerState->TeamName = GameLiftPlayer->TeamName;
 				}
 			}
 		}
@@ -103,7 +104,7 @@ void AGameLiftGameMode::PreLogin(const FString& Options,
 					FString ExpectedPlayerId = PlayerSession.GetPlayerId();
 					auto PlayerStatus = PlayerSession.GetStatus();
 
-					UE_LOG(LogTemp, Warning, TEXT("Expected PlayerId: %s, Actual PlayerId: %s, Player Status: %d"), *ExpectedPlayerId, *PlayerId, (int)PlayerStatus);
+					UE_LOG(LogDayOne, Warning, TEXT("Expected PlayerId: %s, Actual PlayerId: %s, Player Status: %d"), *ExpectedPlayerId, *PlayerId, (int)PlayerStatus);
 
 					if (ExpectedPlayerId.Equals(PlayerId) && PlayerStatus == Aws::GameLift::Server::Model::PlayerSessionStatus::RESERVED)
 					{
@@ -162,10 +163,10 @@ void AGameLiftGameMode::Logout(AController* Exiting)
 			ADayOnePlayerState* DayOnePlayerState = Cast<ADayOnePlayerState>(PlayerState);
 			if (DayOnePlayerState != nullptr)
 			{
-				const FString& PlayerSessionId = DayOnePlayerState->PlayerSessionId;
-				if (PlayerSessionId.Len() > 0)
+				const FGameLiftPlayer* GameLiftPlayer = StartGameSessionState.ReservedPlayers.Find(DayOnePlayerState->PlayerGameId);
+				if (GameLiftPlayer != nullptr)
 				{
-					Aws::GameLift::Server::RemovePlayerSession(TCHAR_TO_ANSI(*PlayerSessionId));
+					Aws::GameLift::Server::RemovePlayerSession(TCHAR_TO_ANSI(*GameLiftPlayer->PlayerSessionId));
 				}
 			}
 		}
@@ -181,9 +182,9 @@ void AGameLiftGameMode::GuardGameSession()
 	{
 		if (StartGameSessionState.bIsSuccess)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Game session is running"))
+			UE_LOG(LogDayOne, Warning, TEXT("Game session is running"))
 			GameSessionState = EGameSessionState::EGST_Running;
-			UE_LOG(LogTemp, Warning, TEXT("SetTimer->CountdownToGameOver"));
+			UE_LOG(LogDayOne, Warning, TEXT("SetTimer->CountdownToGameOver"));
 			GetWorldTimerManager().SetTimer(CountdownToGameOverHandle, this, &ThisClass::CountdownToGameOver, 1.0f, true, 1.0f);
 		}
 	}
@@ -191,9 +192,9 @@ void AGameLiftGameMode::GuardGameSession()
 	{
 		if (ProcessTerminateState.bIsTerminating)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Game session is force terminating"))
+			UE_LOG(LogDayOne, Warning, TEXT("Game session is force terminating"))
 			GameSessionState = EGameSessionState::EGST_Terminating;
-			UE_LOG(LogTemp, Warning, TEXT("SetTimer->ProcessTermination"));
+			UE_LOG(LogDayOne, Warning, TEXT("SetTimer->ProcessTermination"));
 			GetWorldTimerManager().SetTimer(ProcessTerminationHandle, this, &ThisClass::ProcessTermination, 10.0f, true, 1.0f);
 		}
 	}
@@ -210,14 +211,19 @@ void AGameLiftGameMode::CountdownToGameOver()
 		{
 			if (RemainingGameTime >= 0)
 			{
-				DayOneGameState->LatestEvent = FString::FromInt(RemainingGameTime);
+				DayOneGameState->GameOverCountDown = RemainingGameTime;
 			}
 			else
 			{
-				DayOneGameState->LatestEvent = "Game Over";
+				DayOneGameState->GameMessage = "Game Over";
 				// We must clear the CountdownToGameOver timer here. Because this timer is faster than EndGame timer.
 				GetWorldTimerManager().ClearTimer(CountdownToGameOverHandle);
-				UE_LOG(LogTemp, Warning, TEXT("SetTimer->EndGame in CountdownToGameOver"));
+				if (GameSessionState == EGameSessionState::EGST_Terminating)
+				{
+					GetWorldTimerManager().ClearTimer(ProcessTerminationHandle);
+				}
+				GameSessionState = EGameSessionState::EGST_Ending;
+				UE_LOG(LogDayOne, Warning, TEXT("SetTimer->EndGame in CountdownToGameOver"));
 				GetWorldTimerManager().SetTimer(EndGameHandle, this, &ThisClass::EndGame, 1.0f, false, 5.0f);
 			}
 		}
@@ -237,7 +243,7 @@ void AGameLiftGameMode::ProcessTermination()
 		// EndGame timer is faster than ProcessTermination timer,
 		// we can clear ProcessTermination timer in EndGame.
 		GetWorldTimerManager().ClearTimer(ProcessTerminationHandle);
-		UE_LOG(LogTemp, Warning, TEXT("SetTimer->EndGame in ProcessTermination"));
+		UE_LOG(LogDayOne, Warning, TEXT("SetTimer->EndGame in ProcessTermination"));
 		GetWorldTimerManager().SetTimer(EndGameHandle, this, &ThisClass::EndGame, 1.0f, false, 5.0f);
 	}
 	else
@@ -248,13 +254,13 @@ void AGameLiftGameMode::ProcessTermination()
 	ADayOneGameState* DayOneGameState = Cast<ADayOneGameState>(GetWorld()->GetGameState());
 	if (DayOneGameState != nullptr)
 	{
-		DayOneGameState->LatestEvent = GameInterruptionMessage;
+		DayOneGameState->GameMessage = GameInterruptionMessage;
 	}
 }
 
 void AGameLiftGameMode::EndGame()
 {
-	UE_LOG(LogTemp, Warning, TEXT("EndGame"));
+	UE_LOG(LogDayOne, Warning, TEXT("EndGame"));
 	
 	GetWorldTimerManager().ClearTimer(GuardGameSessionHandle);
 	GetWorldTimerManager().ClearTimer(CountdownToGameOverHandle);

@@ -15,37 +15,15 @@ class DAYONE_API UDayOneWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
-	FTimerHandle SetTeammateCountHandle;
-
-	UPROPERTY()
-	FTimerHandle SetLatestEventHandle;
-
-	UPROPERTY()
-	FTimerHandle SetAveragePlayerLatencyHandle;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 protected:
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-	
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* TextBlock_PlayerId;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* TextBlock_TeamName;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UTextBlock* TextBlock_TeammateCount;
+	class UTextBlock* TextBlock_GameMessage;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UTextBlock* TextBlock_Event;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UTextBlock* TextBlock_Ping;
-	
-private:
-	class FGameLiftClientModule* GLClientModule;
-	
-	UFUNCTION()
-	void SetTeammateCount();
-
-	UFUNCTION()
-	void SetLatestEvent();
-
-	UFUNCTION()
-	void SetAveragePlayerLatency();
+	class UTextBlock* TextBlock_GameOverCountDown;
 };

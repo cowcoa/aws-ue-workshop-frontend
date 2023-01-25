@@ -4,6 +4,7 @@
 #include "NewMainMenuWidget.h"
 
 #include "HttpModule.h"
+#include "DayOne/DayOne.h"
 #include "Interfaces/IHttpResponse.h"
 
 UNewMainMenuWidget::UNewMainMenuWidget(const FObjectInitializer& ObjectInitializer)
@@ -17,29 +18,29 @@ void UNewMainMenuWidget::NativeConstruct()
 
 	if (PlayButton)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("--- OnPlayButtonClicked registered ---"));
+		UE_LOG(LogDayOne, Warning, TEXT("--- OnPlayButtonClicked registered ---"));
 		PlayButton->OnClicked.AddDynamic(this, &ThisClass::OnPlayButtonClicked);
 	}
 	if (SettingsButton)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("--- OnSettingsButtonClicked registered ---"));
+		UE_LOG(LogDayOne, Warning, TEXT("--- OnSettingsButtonClicked registered ---"));
 		SettingsButton->OnClicked.AddDynamic(this, &ThisClass::OnSettingsButtonClicked);
 	}
 	if (ExitButton)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("--- OnExitButtonClicked registered ---"));
+		UE_LOG(LogDayOne, Warning, TEXT("--- OnExitButtonClicked registered ---"));
 		ExitButton->OnClicked.AddDynamic(this, &ThisClass::OnExitButtonClicked);
 	}
 }
 
 void UNewMainMenuWidget::OnPlayButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnPlayButtonClicked"));
+	UE_LOG(LogDayOne, Warning, TEXT("OnPlayButtonClicked"));
 }
 
 void UNewMainMenuWidget::OnSettingsButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnSettingsButtonClicked"));
+	UE_LOG(LogDayOne, Warning, TEXT("OnSettingsButtonClicked"));
 
 	FHttpRequestRef Request = FHttpModule::Get().CreateRequest();
 	/*Request->OnProcessRequestComplete().BindUObject(this, &AHttpTestGameMode::OnResponseReceived);
@@ -64,7 +65,7 @@ void UNewMainMenuWidget::OnSettingsButtonClicked()
 
 void UNewMainMenuWidget::OnExitButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnExitButtonClicked"));
+	UE_LOG(LogDayOne, Warning, TEXT("OnExitButtonClicked"));
 }
 
 void UNewMainMenuWidget::OnGetSettingsResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response,
@@ -74,6 +75,6 @@ void UNewMainMenuWidget::OnGetSettingsResponseReceived(FHttpRequestPtr Request, 
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
 	FJsonSerializer::Deserialize(Reader, ResponseObj);
 
-	UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response->GetContentAsString());
-	UE_LOG(LogTemp, Display, TEXT("Title: %s"), *ResponseObj->GetStringField("title"));
+	UE_LOG(LogDayOne, Display, TEXT("Response %s"), *Response->GetContentAsString());
+	UE_LOG(LogDayOne, Display, TEXT("Title: %s"), *ResponseObj->GetStringField("title"));
 }

@@ -10,9 +10,14 @@
 UENUM()
 enum class EGameSessionState : uint8
 {
+	// Game server is ready and waiting for GameLift service OnGameSessionStart callback
 	EGST_Waiting,
+	// Has already received OnGameSessionStart callback
 	EGST_Running,
+	// Has already received OnProcessTermination callback
 	EGST_Terminating,
+	// Players have already finished this game session
+	EGST_Ending
 };
 
 /**

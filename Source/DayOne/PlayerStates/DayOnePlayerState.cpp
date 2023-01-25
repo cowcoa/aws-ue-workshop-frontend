@@ -9,5 +9,6 @@ void ADayOnePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, Team);
+	DOREPLIFETIME(ThisClass, PlayerGameId);
+	DOREPLIFETIME(ThisClass, TeamName);
 }

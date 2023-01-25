@@ -8,6 +8,7 @@
 #include "DayOne/GameInstance/DayOneGameInstance.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "DayOne/DayOne.h"
 #include "Kismet/GameplayStatics.h"
 
 UMultiplayerWidget::UMultiplayerWidget(const FObjectInitializer& ObjectInitializer)
@@ -27,7 +28,7 @@ void UMultiplayerWidget::NativeConstruct()
 	JoinButton->OnClicked.AddDynamic(this, &ThisClass::OnJoinButtonClicked);
 
 	// Setup timer to update latency UI text
-	UE_LOG(LogTemp, Warning, TEXT("SetTimer->UpdateLatencyUI"));
+	UE_LOG(LogDayOne, Warning, TEXT("SetTimer->UpdateLatencyUI"));
 	GetWorld()->GetTimerManager().SetTimer(UpdateLatencyUIHandle, this, &ThisClass::UpdateLatencyUI, 1.0f, true, 1.0f);
 
 	// Check if Cognito token is valid.
@@ -118,15 +119,15 @@ void UMultiplayerWidget::OnJoinButtonClicked()
 
 void UMultiplayerWidget::OnGLLoginResponse(FString AuthzCode)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UMMSettingsWidget::OnGLLoginResponse AuthzCode: %s"), *AuthzCode);
+	UE_LOG(LogDayOne, Warning, TEXT("UMMSettingsWidget::OnGLLoginResponse AuthzCode: %s"), *AuthzCode);
 	GLClientModule->GameLiftClient->ExchangeCodeToTokens(AuthzCode).AddUObject(this, &ThisClass::OnGLExchangeCodeToTokensResponse);
 }
 
 void UMultiplayerWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, FString RefreshToken, int ExpiresIn)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AccessToken: %s"), *AccessToken);
-	UE_LOG(LogTemp, Warning, TEXT("RefreshToken: %s"), *RefreshToken);
-	UE_LOG(LogTemp, Warning, TEXT("ExpiresIn: %d"), ExpiresIn);
+	UE_LOG(LogDayOne, Warning, TEXT("AccessToken: %s"), *AccessToken);
+	UE_LOG(LogDayOne, Warning, TEXT("RefreshToken: %s"), *RefreshToken);
+	UE_LOG(LogDayOne, Warning, TEXT("ExpiresIn: %d"), ExpiresIn);
 
 	// Just for FIRE refresh token timer
 	UGameInstance* GameInstance = GetGameInstance();
@@ -144,7 +145,7 @@ void UMultiplayerWidget::OnGLExchangeCodeToTokensResponse(FString AccessToken, F
 
 void UMultiplayerWidget::OnGLGetPlayerDataResponse(FString PlayerId, int Wins, int Losses)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PlayerId: %s, Wins: %d, Losses: %d"), *PlayerId, Wins, Losses);
+	UE_LOG(LogDayOne, Warning, TEXT("PlayerId: %s, Wins: %d, Losses: %d"), *PlayerId, Wins, Losses);
 
 	TextBlock_PlayerId->SetVisibility(ESlateVisibility::Visible);
 	TextBlock_PlayerId->SetText(FText::FromString(FString::Printf(TEXT("Player ID: %s"), *PlayerId)));
@@ -160,10 +161,10 @@ void UMultiplayerWidget::OnGLGetPlayerDataResponse(FString PlayerId, int Wins, i
 
 void UMultiplayerWidget::OnGLStartMatchmakingResponse(FString TicketId)
 {
-	UE_LOG(LogTemp, Warning, TEXT("TicketId: %s"), *TicketId);
+	UE_LOG(LogDayOne, Warning, TEXT("TicketId: %s"), *TicketId);
 
 	bSearchingForGameSession = true;
-	UE_LOG(LogTemp, Warning, TEXT("SetTimer->PollMatchmaking"));
+	UE_LOG(LogDayOne, Warning, TEXT("SetTimer->PollMatchmaking"));
 	GetWorld()->GetTimerManager().SetTimer(PollMatchmakingHandle, this, &ThisClass::PollMatchmaking, 10.0f, true, 3.0f);
 	
 	UTextBlock* ButtonTextBlock = (UTextBlock*)JoinButton->GetChildAt(0);
@@ -186,7 +187,7 @@ void UMultiplayerWidget::OnGLPollMatchmakingResponse(FString TicketType,
 	                                                FString PlayerId, FString PlayerSessionId,
 	                                                FString IpAddress, FString Port)
 {
-	UE_LOG(LogTemp, Warning, TEXT("TicketType: %s, PlayerId: %s, PlayerSessionId: %s, IpAddress: %s, Port: %s"), *TicketType, *PlayerId, *PlayerSessionId, *IpAddress, *Port);
+	UE_LOG(LogDayOne, Warning, TEXT("TicketType: %s, PlayerId: %s, PlayerSessionId: %s, IpAddress: %s, Port: %s"), *TicketType, *PlayerId, *PlayerSessionId, *IpAddress, *Port);
 
 	if (bSearchingForGameSession)
 	{
@@ -200,7 +201,7 @@ void UMultiplayerWidget::OnGLPollMatchmakingResponse(FString TicketType,
 
 			FString LevelName = IpAddress + ":" + Port;
 			const FString& Options = "?PlayerSessionId=" + PlayerSessionId + "?PlayerId=" + PlayerId;
-			UE_LOG(LogTemp, Warning, TEXT("options: %s"), *Options);
+			UE_LOG(LogDayOne, Warning, TEXT("options: %s"), *Options);
 
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelName), false, Options);
 		}

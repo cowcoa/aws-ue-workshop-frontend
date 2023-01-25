@@ -1,6 +1,6 @@
 ﻿#include "GameLiftClient.h"
 
-DEFINE_LOG_CATEGORY(LogGLClient);
+DEFINE_LOG_CATEGORY(LogGameLiftClient);
 
 UGameLiftClient::UGameLiftClient()
 {
@@ -20,13 +20,13 @@ void UGameLiftClient::PostInitProperties()
 {
 	UObject::PostInitProperties();
 	
-	UE_LOG(LogGLClient, Warning, TEXT("LoginUrl: %s"), *LoginUrl);
-	UE_LOG(LogGLClient, Warning, TEXT("LoginCallbackUrl: %s"), *LoginCallbackUrl);
-	UE_LOG(LogGLClient, Warning, TEXT("ApiKey: %s"), *ApiKey);
-	UE_LOG(LogGLClient, Warning, TEXT("InvokeUrl: %s"), *InvokeUrl);
+	UE_LOG(LogGameLiftClient, Warning, TEXT("LoginUrl: %s"), *LoginUrl);
+	UE_LOG(LogGameLiftClient, Warning, TEXT("LoginCallbackUrl: %s"), *LoginCallbackUrl);
+	UE_LOG(LogGameLiftClient, Warning, TEXT("ApiKey: %s"), *ApiKey);
+	UE_LOG(LogGameLiftClient, Warning, TEXT("InvokeUrl: %s"), *InvokeUrl);
 	for (FString Region : RegionCodes)
 	{
-		UE_LOG(LogGLClient, Warning, TEXT("Region: %s"), *Region);
+		UE_LOG(LogGameLiftClient, Warning, TEXT("Region: %s"), *Region);
 
 		AverageLatencyPerRegion.Add(Region, 0.0f);
 		LatencyListPerRegion.Add(Region, MakeShareable(new LatencyList));
@@ -60,7 +60,7 @@ void UGameLiftClient::OnLoginUrlChanged(const FText& BrowserUrl)
 	FString Url;
 	FString QueryParameters;
 
-	UE_LOG(LogTemp, Warning, TEXT("BrowserUrl: %s"), *BrowserUrl.ToString())
+	UE_LOG(LogGameLiftClient, Warning, TEXT("BrowserUrl: %s"), *BrowserUrl.ToString())
 
 	// Only process Cognito Hosted UI login callback URL.
 	if (BrowserUrl.ToString().Split("?", &Url, &QueryParameters)) {
@@ -109,7 +109,7 @@ FOnExchangeCodeToTokensResponse& UGameLiftClient::ExchangeCodeToTokens(const FSt
 	}
 	else
 	{
-		UE_LOG(LogGLClient, Warning, TEXT("Failed to serialize json object to string"));
+		UE_LOG(LogGameLiftClient, Warning, TEXT("Failed to serialize json object to string"));
 	}
 
 	return OnExchangeCodeToTokensResponse;
@@ -117,7 +117,7 @@ FOnExchangeCodeToTokensResponse& UGameLiftClient::ExchangeCodeToTokens(const FSt
 
 void UGameLiftClient::OnExchangeCodeToTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnExchangeCodeToTokensResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
+	UE_LOG(LogGameLiftClient, Warning, TEXT("GameLiftClient::OnExchangeCodeToTokensResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
 	if (bConnectedSuccessfully)
 	{
@@ -130,7 +130,7 @@ void UGameLiftClient::OnExchangeCodeToTokensResponseReceived(FHttpRequestPtr Req
 				TokenExpiresIn = JsonObject->GetIntegerField("expiresIn");
 				TokenTTL = FDateTime::UtcNow().ToUnixTimestamp() + TokenExpiresIn;
 
-				UE_LOG(LogGLClient, Warning, TEXT("AccessToken: %s, RefreshToken: %s, ExpiresIn: %d"), *AccessToken, *RefreshToken, TokenExpiresIn);
+				UE_LOG(LogGameLiftClient, Warning, TEXT("AccessToken: %s, RefreshToken: %s, ExpiresIn: %d"), *AccessToken, *RefreshToken, TokenExpiresIn);
 
 				if (OnExchangeCodeToTokensResponse.IsBound())
 				{
@@ -140,12 +140,12 @@ void UGameLiftClient::OnExchangeCodeToTokensResponseReceived(FHttpRequestPtr Req
 		}
 		else
 		{
-			UE_LOG(LogGLClient, Warning, TEXT("Failed to deserialize body string to json object"));
+			UE_LOG(LogGameLiftClient, Warning, TEXT("Failed to deserialize body string to json object"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogGLClient, Warning, TEXT("ExchangeCodeToTokens request get failed response"));
+		UE_LOG(LogGameLiftClient, Warning, TEXT("ExchangeCodeToTokens request get failed response"));
 	}
 }
 
@@ -177,24 +177,24 @@ FOnRefreshTokensResponse& UGameLiftClient::RefreshTokens()
 
 void UGameLiftClient::OnRefreshTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnRefreshTokensResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
+	UE_LOG(LogGameLiftClient, Warning, TEXT("GameLiftClient::OnRefreshTokensResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
 	// Process error first
 	if (!IsTokenValid())
 	{
-		UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. AccessToken has timedout."));
+		UE_LOG(LogGameLiftClient, Warning, TEXT("Failed refresh cognito tokens. AccessToken has timedout."));
 		OnRefreshTokensResponse.ExecuteIfBound("", false);
 		return;
 	}
 	if (!bConnectedSuccessfully)
 	{
-		UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. Can't connect with server."));
+		UE_LOG(LogGameLiftClient, Warning, TEXT("Failed refresh cognito tokens. Can't connect with server."));
 		OnRefreshTokensResponse.ExecuteIfBound("", false);
 		return;
 	}
 	if (Response->GetResponseCode() > 400)
 	{
-		UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. Response code: %d. Reason: %s."),
+		UE_LOG(LogGameLiftClient, Warning, TEXT("Failed refresh cognito tokens. Response code: %d. Reason: %s."),
 			Response->GetResponseCode(), *Response->GetContentAsString());
 		OnRefreshTokensResponse.ExecuteIfBound("", false);
 		return;
@@ -214,7 +214,7 @@ void UGameLiftClient::OnRefreshTokensResponseReceived(FHttpRequestPtr Request, F
 		}
 		else
 		{
-			UE_LOG(LogGLClient, Warning, TEXT("Failed refresh cognito tokens. No 'accessToken' field in response."));
+			UE_LOG(LogGameLiftClient, Warning, TEXT("Failed refresh cognito tokens. No 'accessToken' field in response."));
 			OnRefreshTokensResponse.ExecuteIfBound("", false);
 		}
 	}
@@ -238,7 +238,7 @@ FOnRevokeTokensResponse& UGameLiftClient::RevokeTokens()
 
 void UGameLiftClient::OnRevokeTokensResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnRevokeTokensResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
+	UE_LOG(LogGameLiftClient, Warning, TEXT("GameLiftClient::OnRevokeTokensResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
 	if (bConnectedSuccessfully)
 	{
@@ -268,7 +268,7 @@ FOnGetPlayerDataResponse& UGameLiftClient::GetPlayerData()
 
 void UGameLiftClient::OnGetPlayerDataResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnGetPlayerDataResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
+	UE_LOG(LogGameLiftClient, Warning, TEXT("GameLiftClient::OnGetPlayerDataResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
 	if (bConnectedSuccessfully) {
 		TSharedPtr<FJsonObject> JsonObject;
@@ -317,7 +317,7 @@ FOnStartMatchmakingResponse& UGameLiftClient::StartMatchmaking()
 
 void UGameLiftClient::OnStartMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnStartMatchmakingResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
+	UE_LOG(LogGameLiftClient, Warning, TEXT("GameLiftClient::OnStartMatchmakingResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
 	if (bConnectedSuccessfully) {
 		TSharedPtr<FJsonObject> JsonObject;
@@ -350,7 +350,7 @@ FOnStopMatchmakingResponse& UGameLiftClient::StopMatchmaking()
 
 void UGameLiftClient::OnStopMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnStopMatchmakingResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
+	UE_LOG(LogGameLiftClient, Warning, TEXT("GameLiftClient::OnStopMatchmakingResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
 	if (bConnectedSuccessfully)
 	{
@@ -377,7 +377,7 @@ FOnPollMatchmakingResponse& UGameLiftClient::PollMatchmaking()
 
 void UGameLiftClient::OnPollMatchmakingResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	UE_LOG(LogGLClient, Warning, TEXT("GameLiftClient::OnPollMatchmakingResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
+	UE_LOG(LogGameLiftClient, Warning, TEXT("GameLiftClient::OnPollMatchmakingResponseReceived, ResponseCode: %d"), Response->GetResponseCode());
 	
 	if (bConnectedSuccessfully)
 	{

@@ -16,10 +16,9 @@ class DAYONE_API ADayOneGameState : public AGameStateBase
 
 public:
 	UPROPERTY(Replicated)
-	FString LatestEvent;
-
+	FString GameMessage;
 	UPROPERTY(Replicated)
-	FString WinningTeam;
+	int GameOverCountDown;
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;

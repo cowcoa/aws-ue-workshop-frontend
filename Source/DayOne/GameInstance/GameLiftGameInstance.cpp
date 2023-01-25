@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GameLiftGameInstance.h"
+#include "DayOne/DayOne.h"
 #include "GameLiftServerSDK.h"
 
 void UGameLiftGameInstance::OnStart()
@@ -15,7 +16,7 @@ void UGameLiftGameInstance::OnStart()
 		// OnHealthCheck callback
 		auto OnHealthCheck = [](OUT void* State)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("OnHealthCheck"));
+			UE_LOG(LogDayOne, Warning, TEXT("OnHealthCheck"));
 			
 			return true;
 		};
@@ -23,12 +24,12 @@ void UGameLiftGameInstance::OnStart()
 		// OnStartGameSession callback
 		auto OnStartGameSession = [](Aws::GameLift::Server::Model::GameSession GameSession, OUT void* State)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Get OnStartGameSession called from GameLift service"));
+			UE_LOG(LogDayOne, Warning, TEXT("Get OnStartGameSession called from GameLift service"));
 			
 			FStartGameSessionState* OutputState = (FStartGameSessionState*)State;
 			if (OutputState == nullptr)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("FStartGameSessionState object is NULL"));
+				UE_LOG(LogDayOne, Warning, TEXT("FStartGameSessionState object is NULL"));
 				return;
 			}
 
@@ -66,24 +67,24 @@ void UGameLiftGameInstance::OnStart()
 				else
 				{
 					OutputState->ReservedPlayers.Empty();
-					UE_LOG(LogTemp, Warning, TEXT("Failed to ActivateGameSession: %s"), ANSI_TO_TCHAR(ActiveGameSessionOutcome.GetError().GetErrorMessage()));
+					UE_LOG(LogDayOne, Warning, TEXT("Failed to ActivateGameSession: %s"), ANSI_TO_TCHAR(ActiveGameSessionOutcome.GetError().GetErrorMessage()));
 				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Failed to deserialize GameSession's MatchmakerData: %s"), *MatchmakerData);
+				UE_LOG(LogDayOne, Warning, TEXT("Failed to deserialize GameSession's MatchmakerData: %s"), *MatchmakerData);
 			}
 		};
 
 		// OnProcessTerminate callback
 		auto OnProcessTerminate = [](OUT void* State)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Get OnProcessTerminate called from GameLift service"));
+			UE_LOG(LogDayOne, Warning, TEXT("Get OnProcessTerminate called from GameLift service"));
 			
 			FProcessTerminateState* OutputState = (FProcessTerminateState*)State;
 			if (OutputState == nullptr)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("FProcessTerminateState object is NULL"));
+				UE_LOG(LogDayOne, Warning, TEXT("FProcessTerminateState object is NULL"));
 				return;
 			}
 			
@@ -144,12 +145,12 @@ void UGameLiftGameInstance::OnStart()
 		auto ProcessReadyOutcome = Aws::GameLift::Server::ProcessReady(*ProcessParams);
 		if (!ProcessReadyOutcome.IsSuccess())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to call GameLift ProcessReady: %s"), ANSI_TO_TCHAR(ProcessReadyOutcome.GetError().GetErrorMessage()));
+			UE_LOG(LogDayOne, Warning, TEXT("Failed to call GameLift ProcessReady: %s"), ANSI_TO_TCHAR(ProcessReadyOutcome.GetError().GetErrorMessage()));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to init GameLiftServerSDK: %s"), ANSI_TO_TCHAR(InitSDKOutcome.GetError().GetErrorMessage()));
+		UE_LOG(LogDayOne, Warning, TEXT("Failed to init GameLiftServerSDK: %s"), ANSI_TO_TCHAR(InitSDKOutcome.GetError().GetErrorMessage()));
 	}
 #endif
 }

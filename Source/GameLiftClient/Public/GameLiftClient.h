@@ -5,7 +5,7 @@
 #include "WebBrowser.h"
 #include "GameLiftClient.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogGLClient, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogGameLiftClient, Log, All);
 
 typedef TMap<FString, float> LatencyMap;
 typedef TDoubleLinkedList<float> LatencyList;

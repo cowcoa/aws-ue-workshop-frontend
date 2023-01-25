@@ -15,6 +15,7 @@ struct FGameLiftPlayer
 	GENERATED_BODY()
 
 	FString PlayerId;
+	FString PlayerSessionId;
 	FString TeamName;
 };
 
