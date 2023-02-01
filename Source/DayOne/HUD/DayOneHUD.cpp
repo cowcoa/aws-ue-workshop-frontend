@@ -15,11 +15,13 @@ void ADayOneHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/*
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController != nullptr) {
 		PlayerController->bShowMouseCursor = false;
 		PlayerController->SetInputMode(FInputModeGameAndUI());
 	}
+	*/
 
 	if (DayOneWidgetClass != nullptr) {
 		UUserWidget* DayOneWidget = CreateWidget<UUserWidget>(GetWorld(), DayOneWidgetClass);

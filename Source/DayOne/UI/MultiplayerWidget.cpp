@@ -201,7 +201,7 @@ void UMultiplayerWidget::OnGLPollMatchmakingResponse(FString TicketType,
 
 			FString LevelName = IpAddress + ":" + Port;
 			const FString& Options = "?PlayerSessionId=" + PlayerSessionId + "?PlayerId=" + PlayerId;
-			UE_LOG(LogDayOne, Warning, TEXT("options: %s"), *Options);
+			UE_LOG(LogDayOne, Warning, TEXT("LevelName: %s, options: %s"), *LevelName, *Options);
 
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelName), false, Options);
 		}

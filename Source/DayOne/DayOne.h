@@ -4,5 +4,6 @@
 
 #include "CoreMinimal.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogDayOne, Log, All);
+#define ECC_SkeletalMesh ECollisionChannel::ECC_GameTraceChannel1
 
+DECLARE_LOG_CATEGORY_EXTERN(LogDayOne, Log, All);
