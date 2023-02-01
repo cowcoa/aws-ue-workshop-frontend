@@ -21,6 +21,8 @@ public:
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
 
+	void FireButtonPressed(bool bPressed);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -54,6 +56,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
+
+	bool bFireButtonPressed;
 
 public:	
 	// Called every frame

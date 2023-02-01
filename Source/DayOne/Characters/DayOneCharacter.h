@@ -34,6 +34,11 @@ public:
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	AWeapon* GetEquippedWeapon();
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
+
+	/**
+	* Play montages
+	*/
+	void PlayFireMontage(bool bAiming);
 	
 protected:
 	// Called when the game starts or when spawned
@@ -56,12 +61,22 @@ protected:
 	void AimButtonPressed();
 	UFUNCTION(BlueprintCallable, Category=Input)
 	void AimButtonReleased();
+	UFUNCTION(BlueprintCallable, Category=Input)
+	void FireButtonPressed();
+	UFUNCTION(BlueprintCallable, Category=Input)
+	void FireButtonReleased();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UWidgetComponent* OverheadWidget;
 
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
+
+	/**
+	* Animation montages
+	*/
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* FireWeaponMontage;
 	
 private:
 	void MoveForward(float Value);
