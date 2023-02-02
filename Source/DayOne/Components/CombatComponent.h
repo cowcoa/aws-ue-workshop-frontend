@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "DayOne/HUD/CombatHUD.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -47,9 +48,15 @@ protected:
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
+	void SetHUDCrosshairs(float DeltaTime);
+
 private:
 	UPROPERTY()
 	class ADayOneCharacter* Character;
+	UPROPERTY()
+	class ADayOnePlayerController* Controller;
+	UPROPERTY()
+	class ACombatHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
@@ -67,6 +74,16 @@ private:
 	float AimWalkSpeed;
 
 	bool bFireButtonPressed;
+
+	/** 
+	* HUD and crosshairs
+	*/
+	float CrosshairVelocityFactor;
+	float CrosshairInAirFactor;
+	float CrosshairAimFactor;
+	float CrosshairShootingFactor;
+
+	FHUDPackage HUDPackage;
 
 public:	
 	// Called every frame

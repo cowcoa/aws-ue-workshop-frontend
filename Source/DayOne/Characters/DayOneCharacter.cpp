@@ -119,6 +119,8 @@ void ADayOneCharacter::Move(const FVector2D& MoveValue)
 	if (Controller != nullptr)
 	{
 		//const FVector2D MoveValue = Value.Get<FVector2D>();
+
+		UE_LOG(LogTemp, Warning, TEXT("Moving dirction: %f, %f"), MoveValue.X, MoveValue.Y);
 		
 		// Forward/Backward direction
 		if (MoveValue.Y != 0.f)

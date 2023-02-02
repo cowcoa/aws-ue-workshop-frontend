@@ -20,17 +20,17 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 		Role = FString("Authority");
 		break;
 	case ENetRole::ROLE_AutonomousProxy:
-		Role = FString("Autonomous Proxy");
+		Role = FString("AProxy"); // Autonomous Proxy
 		break;
 	case ENetRole::ROLE_SimulatedProxy:
-		Role = FString("Simulated Proxy");
+		Role = FString("SProxy"); // Simulated Proxy
 		break;
 	case ENetRole::ROLE_None:
 		Role = FString("None");
 		break;
 	}
 	FString LocalRoleString = FString::Printf(TEXT("Local Role: %s"), *Role);
-	SetDisplayText(LocalRoleString);
+	SetDisplayText(Role);
 }
 
 void UOverheadWidget::NativeDestruct()
