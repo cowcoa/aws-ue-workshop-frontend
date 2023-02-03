@@ -26,9 +26,9 @@ ADayOneCharacter::ADayOneCharacter()
 	CameraBoom->TargetArmLength = 600.f;
 	CameraBoom->bUsePawnControlRotation = true;
 
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	FollowCharCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCharCamera"));
+	FollowCharCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCharCamera->bUsePawnControlRotation = false;
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
@@ -75,6 +75,11 @@ FVector ADayOneCharacter::GetHitTarget() const
 {
 	if (Combat == nullptr) return FVector();
 	return Combat->HitTarget;
+}
+
+UCameraComponent* ADayOneCharacter::GetFollowCamera() const
+{
+	return FollowCharCamera;
 }
 
 void ADayOneCharacter::PlayFireMontage(bool bAiming)

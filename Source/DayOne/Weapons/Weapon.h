@@ -81,6 +81,16 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
+
+	/** 
+    * Zoomed FOV while aiming
+    */
+
+    UPROPERTY(EditAnywhere)
+    float ZoomedFOV = 30.f;
+
+    UPROPERTY(EditAnywhere)
+    float ZoomInterpSpeed = 20.f;
 	
 public:	
 	// Called every frame
@@ -103,4 +113,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 	UTexture2D* CrosshairsBottom;
+
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 };

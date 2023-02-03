@@ -37,6 +37,8 @@ public:
 
 	FVector GetHitTarget() const;
 
+	class UCameraComponent* GetFollowCamera() const;
+
 	/**
 	* Play montages
 	*/
@@ -117,12 +119,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* FollowCamera;
-
+	class UCameraComponent* FollowCharCamera;
 };

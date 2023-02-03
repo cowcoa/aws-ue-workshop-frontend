@@ -2,6 +2,8 @@
 
 
 #include "CombatComponent.h"
+
+#include "Camera/CameraComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "DayOne/Characters/DayOneCharacter.h"
 #include "DayOne/HUD/CombatHUD.h"
@@ -58,6 +60,12 @@ void UCombatComponent::BeginPlay()
 	if (Character)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+
+		if (Character->GetFollowCamera())
+		{
+			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
+			CurrentFOV = DefaultFOV;
+		}
 	}
 	
 }
@@ -234,6 +242,30 @@ void UCombatComponent::OnRep_Aiming()
 	UE_LOG(LogTemp, Warning, TEXT("aiming: %s"), bAiming ? *FString("Aiming") : *FString("Not Aiming"))
 }
 
+void UCombatComponent::InterpFOV(float DeltaTime)
+{
+	if (EquippedWeapon == nullptr) return;
+
+	if (bAiming)
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
+	}
+	else
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("CurrentFOV: %f"), CurrentFOV);
+	if (Character)
+	{
+		UCameraComponent* FollowCamera = Character->GetFollowCamera();
+		if (FollowCamera)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("SetFieldOfView"));
+			Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
+		}
+	}
+}
+
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -246,6 +278,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		HitTarget = HitResult.ImpactPoint;
 
 		SetHUDCrosshairs(DeltaTime);
+		InterpFOV(DeltaTime);
 	}
 }
 
