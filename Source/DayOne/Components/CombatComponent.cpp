@@ -238,7 +238,14 @@ void UCombatComponent::OnRep_Aiming()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	if (Character && Character->IsLocallyControlled())
+	{
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		HitTarget = HitResult.ImpactPoint;
 
-	SetHUDCrosshairs(DeltaTime);
+		SetHUDCrosshairs(DeltaTime);
+	}
 }
 

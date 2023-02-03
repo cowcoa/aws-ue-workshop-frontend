@@ -17,7 +17,7 @@ ACasing::ACasing()
 	CasingMesh->SetSimulatePhysics(true);
 	CasingMesh->SetEnableGravity(true);
 	CasingMesh->SetNotifyRigidBodyCollision(true);
-	ShellEjectionImpulse = 5.f;
+	ShellEjectionImpulse = 10.f;
 
 	OnHitTimes = 0;
 	MaxOnHitTimes = 3;

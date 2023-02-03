@@ -4,6 +4,7 @@
 #include "DayOneAnimInstance.h"
 
 #include "DayOne/Weapons/Weapon.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -61,15 +62,20 @@ void UDayOneAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		DayOneCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
 		LeftHandTransform.SetLocation(OutPosition);
 		LeftHandTransform.SetRotation(FQuat(OutRotation));
-
-		/*
+		
 		if (DayOneCharacter->IsLocallyControlled())
 		{
 			bLocallyControlled = true;
 			FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r"), ERelativeTransformSpace::RTS_World);
-			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - DayOneCharacter->GetHitTarget()));
 			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaTime, 30.f);
+
+			// debug
+			const USkeletalMeshSocket* MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+			FTransform MFSocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+			DrawDebugLine(GetWorld(), MFSocketTransform.GetLocation(), DayOneCharacter->GetHitTarget(), FColor::Red);
+			const FVector MFDirection(FRotationMatrix(MFSocketTransform.GetRotation().Rotator()).GetUnitAxis(EAxis::X));
+			DrawDebugLine(GetWorld(), MFSocketTransform.GetLocation(), MFSocketTransform.GetLocation() + MFDirection * 1000.0f, FColor::Orange);
 		}
-		*/
 	}
 }
