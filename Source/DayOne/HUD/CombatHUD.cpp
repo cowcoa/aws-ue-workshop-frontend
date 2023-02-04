@@ -10,10 +10,6 @@ void ACombatHUD::DrawHUD()
 	FVector2D ViewportSize;
 	if (GEngine)
 	{
-		// temp
-		HUDPackage.CrosshairsColor = FLinearColor::White;
-		// temp end
-		
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 

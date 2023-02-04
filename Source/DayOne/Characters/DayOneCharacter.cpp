@@ -37,6 +37,7 @@ ADayOneCharacter::ADayOneCharacter()
 	Combat->SetIsReplicated(true);
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
@@ -94,6 +95,11 @@ void ADayOneCharacter::PlayFireMontage(bool bAiming)
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+}
+
+void ADayOneCharacter::MulticastHitReact_Implementation()
+{
+	PlayHitReactMontage();
 }
 
 // Called when the game starts or when spawned
@@ -256,6 +262,19 @@ void ADayOneCharacter::CalculateAO_Pitch()
 	}
 }
 
+void ADayOneCharacter::PlayHitReactMontage()
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		FName SectionName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
 void ADayOneCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value != 0.f)
@@ -338,12 +357,54 @@ void ADayOneCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
+void ADayOneCharacter::HideCameraIfCharacterClose()
+{
+	if (!IsLocallyControlled()) return;
+
+	TArray<USceneComponent*> MeshChildren;
+	GetMesh()->GetChildrenComponents(false, MeshChildren);
+	
+	if ((FollowCharCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		for (auto Child : MeshChildren)
+		{
+			USkeletalMeshComponent* MeshChild = Cast<USkeletalMeshComponent>(Child);
+			if (MeshChild != nullptr && Combat->EquippedWeapon != nullptr && MeshChild != Combat->EquippedWeapon->GetWeaponMesh())
+			{
+				MeshChild->SetVisibility(false);
+			}
+		}
+		GetMesh()->SetVisibility(false);
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
+	}
+	else
+	{
+		for (auto Child : MeshChildren)
+		{
+			USkeletalMeshComponent* MeshChild = Cast<USkeletalMeshComponent>(Child);
+			if (MeshChild != nullptr && Combat->EquippedWeapon != nullptr && MeshChild != Combat->EquippedWeapon->GetWeaponMesh())
+			{
+				MeshChild->SetVisibility(true);
+			}
+		}
+		GetMesh()->SetVisibility(true);
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+	}
+}
+
 // Called every frame
 void ADayOneCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	AimOffset(DeltaTime);
+	HideCameraIfCharacterClose();
 }
 
 // Called to bind functionality to input

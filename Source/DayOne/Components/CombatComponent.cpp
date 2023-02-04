@@ -4,6 +4,7 @@
 #include "CombatComponent.h"
 
 #include "Camera/CameraComponent.h"
+#include "DayOne/DayOne.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "DayOne/Characters/DayOneCharacter.h"
 #include "DayOne/HUD/CombatHUD.h"
@@ -64,6 +65,11 @@ void UCombatComponent::BeginPlay()
 
 	if (Character)
 	{
+		if (Character->Implements<UInteractWithCrosshairsInterface>())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("**** UInteractWithCrosshairsInterface &&&&"));
+		}
+		
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
 		if (Character->GetFollowCamera())
@@ -134,17 +140,34 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	if (bScreenToWorld)
 	{
 		FVector Start = CrosshairWorldPosition;
+		if (Character)
+		{
+			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 20.f);
+			DrawDebugSphere(GetWorld(), Start, 16.0f, 12, FColor::Red, false);
+		}
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
-		
+
+		//FCollisionQueryParams QueryParams;
+		//QueryParams.bTraceComplex = true;
 		GetWorld()->LineTraceSingleByChannel(
 			TraceHitResult,
 			Start,
 			End,
-			ECollisionChannel::ECC_Visibility
+			ECC_Visibility
 		);
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
+		}
+		
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::White;
 		}
 	}
 }

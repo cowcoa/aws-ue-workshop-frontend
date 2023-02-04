@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DayOne/Interfaces/InteractWithCrosshairsInterface.h"
 #include "GameFramework/Character.h"
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "DayOneCharacter.generated.h"
@@ -18,7 +19,7 @@ enum class ETurningInPlace : uint8
 };
 
 UCLASS()
-class DAYONE_API ADayOneCharacter : public ACharacter
+class DAYONE_API ADayOneCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 
@@ -43,6 +44,10 @@ public:
 	* Play montages
 	*/
 	void PlayFireMontage(bool bAiming);
+
+	// Multicast play hit react montage
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHitReact();
 	
 protected:
 	// Called when the game starts or when spawned
@@ -79,8 +84,13 @@ protected:
 	/**
 	* Animation montages
 	*/
+	void PlayHitReactMontage();
+	
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* HitReactMontage;
 	
 private:
 	void MoveForward(float Value);
@@ -112,6 +122,10 @@ private:
 	// turn
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
+
+	void HideCameraIfCharacterClose();
+	UPROPERTY(EditAnywhere)
+	float CameraThreshold = 200.f;
 
 public:	
 	// Called every frame
