@@ -43,17 +43,22 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
+	/*
 	bFireButtonPressed = bPressed;
 	if (bFireButtonPressed)
 	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		ServerFire(HitResult.ImpactPoint);
+		ServerFire(HitTarget);
 
 		if (EquippedWeapon)
 		{
 			CrosshairShootingFactor = .95f;
 		}
+	}
+	*/
+	bFireButtonPressed = bPressed;
+	if (bFireButtonPressed)
+	{
+		Fire();
 	}
 }
 
@@ -241,6 +246,21 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	}
 }
 
+void UCombatComponent::Fire()
+{
+	if (CanFire())
+	{
+		bCanFire = false;
+		if (EquippedWeapon)
+		{
+			CrosshairShootingFactor = .75f;
+
+			ServerFire(HitTarget);
+		}
+		StartFireTimer();
+	}
+}
+
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	MulticastFire(TraceHitTarget);
@@ -282,16 +302,46 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("CurrentFOV: %f"), CurrentFOV);
 	if (Character)
 	{
 		UCameraComponent* FollowCamera = Character->GetFollowCamera();
 		if (FollowCamera)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("SetFieldOfView"));
 			Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
 		}
 	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer,
+		this,
+		&UCombatComponent::FireTimerFinished,
+		EquippedWeapon->FireDelay
+	);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Fire Again"));
+		Fire();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't Fire Again"));
+	}
+}
+
+bool UCombatComponent::CanFire()
+{
+	if (EquippedWeapon == nullptr) return false;
+	return bCanFire;
 }
 
 // Called every frame

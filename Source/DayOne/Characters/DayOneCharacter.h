@@ -48,12 +48,15 @@ public:
 	// Multicast play hit react montage
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastHitReact();
+
+	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+	virtual void OnRep_ReplicatedMovement() override;
 	
 	// Input process callback
 	UFUNCTION(BlueprintCallable, Category=Input)
@@ -80,6 +83,7 @@ protected:
 
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
+	void SimProxiesTurn();
 
 	/**
 	* Animation montages
@@ -111,6 +115,11 @@ private:
 	void ServerEquipButtonPressed();
 
 	bool bRotateRootBone;
+	float TurnThreshold = 0.25f;
+	FRotator ProxyRotationLastFrame;
+	FRotator ProxyRotation;
+	float ProxyYaw;
+	float TimeSinceLastMovementReplication;
 	float CalculateSpeed();
 
 	// AO Data

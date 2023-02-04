@@ -36,6 +36,7 @@ void UDayOneAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsCrouched = DayOneCharacter->bIsCrouched;
 	bAiming = DayOneCharacter->IsAiming();
 	TurningInPlace = DayOneCharacter->GetTurningInPlace();
+	bRotateRootBone = DayOneCharacter->ShouldRotateRootBone();
 
 	// Offset Yaw for Strafing
 	FRotator AimRotation = DayOneCharacter->GetBaseAimRotation();

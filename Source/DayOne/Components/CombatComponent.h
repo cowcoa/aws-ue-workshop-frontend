@@ -50,6 +50,8 @@ protected:
 
 	void SetHUDCrosshairs(float DeltaTime);
 
+	void Fire();
+
 private:
 	UPROPERTY()
 	class ADayOneCharacter* Character;
@@ -88,8 +90,8 @@ private:
 	FHUDPackage HUDPackage;
 
 	/** 
-* Aiming and FOV
-*/
+	* Aiming and FOV
+	*/
 
 	// Field of view when not aiming; set to the camera's base FOV in BeginPlay
 	float DefaultFOV;
@@ -103,6 +105,18 @@ private:
 	float ZoomInterpSpeed = 20.f;
 
 	void InterpFOV(float DeltaTime);
+
+	/**
+	* Automatic fire
+	*/
+
+	FTimerHandle FireTimer;
+	bool bCanFire = true;
+
+	void StartFireTimer();
+	void FireTimerFinished();
+
+	bool CanFire();
 
 public:	
 	// Called every frame
