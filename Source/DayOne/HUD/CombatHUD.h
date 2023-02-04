@@ -30,8 +30,18 @@ class DAYONE_API ACombatHUD : public AHUD
 
 public:
 	virtual void DrawHUD() override;
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+	void AddCharacterOverlay();
+
+	UPROPERTY()
+	class UCharacterOverlayWidget* CharacterOverlay;
 	
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	FHUDPackage HUDPackage;

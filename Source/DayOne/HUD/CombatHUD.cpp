@@ -3,6 +3,9 @@
 
 #include "CombatHUD.h"
 
+#include "Blueprint/UserWidget.h"
+#include "DayOne/UI/CharacterOverlayWidget.h"
+
 void ACombatHUD::DrawHUD()
 {
 	Super::DrawHUD();
@@ -43,8 +46,25 @@ void ACombatHUD::DrawHUD()
 	}	
 }
 
+void ACombatHUD::AddCharacterOverlay()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && CharacterOverlayClass)
+	{
+		CharacterOverlay = CreateWidget<UCharacterOverlayWidget>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
+	}
+}
+
+void ACombatHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AddCharacterOverlay();
+}
+
 void ACombatHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread,
-	FLinearColor CrosshairColor)
+                               FLinearColor CrosshairColor)
 {
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();

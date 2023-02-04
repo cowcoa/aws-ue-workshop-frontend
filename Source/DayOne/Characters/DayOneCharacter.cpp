@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "DayOne/DayOne.h"
 #include "DayOne/Components/CombatComponent.h"
+#include "DayOne/PlayerController/DayOnePlayerController.h"
 #include "DayOne/UI/OverheadWidget.h"
 #include "DayOne/Weapons/Weapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -106,6 +107,12 @@ void ADayOneCharacter::MulticastHitReact_Implementation()
 void ADayOneCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	DayOnePlayerController = DayOnePlayerController == nullptr ? Cast<ADayOnePlayerController>(Controller) : DayOnePlayerController;
+	if (DayOnePlayerController)
+	{
+		DayOnePlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 
 	auto OverheadWidgetObject = Cast<UOverheadWidget>(OverheadWidget->GetUserWidgetObject());
 	if (OverheadWidgetObject)
@@ -363,6 +370,10 @@ float ADayOneCharacter::CalculateSpeed()
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	return Velocity.Size();
+}
+
+void ADayOneCharacter::OnRep_Health(float LastHealth)
+{
 }
 
 void ADayOneCharacter::ServerEquipButtonPressed_Implementation()

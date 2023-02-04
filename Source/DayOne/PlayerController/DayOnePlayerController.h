@@ -13,5 +13,14 @@ UCLASS()
 class DAYONE_API ADayOnePlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
+public:
+	void SetHUDHealth(float Health, float MaxHealth);
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY()
+	class ACombatHUD* CombatHUD;
 };
