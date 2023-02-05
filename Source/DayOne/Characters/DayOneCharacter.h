@@ -57,6 +57,10 @@ public:
 	void MulticastElim(bool bPlayerLeftGame);
 
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
+
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	
 protected:
 	// Called when the game starts or when spawned

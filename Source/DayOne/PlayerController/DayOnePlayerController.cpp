@@ -30,3 +30,8 @@ void ADayOnePlayerController::BeginPlay()
 
 	CombatHUD = Cast<ACombatHUD>(GetHUD());
 }
+
+void ADayOnePlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+}
