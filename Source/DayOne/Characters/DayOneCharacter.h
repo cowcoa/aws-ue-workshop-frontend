@@ -27,7 +27,7 @@ public:
 	// Sets default values for this character's properties
 	ADayOneCharacter();
 
-	void SetOverlappingWeapon(AWeapon* Weapon);
+	void SetOverlappingWeapon(class AWeapon* Weapon);
 	bool IsWeaponEquipped();
 	bool IsAiming();
 
@@ -50,6 +50,8 @@ public:
 	void MulticastHitReact();
 
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+
+	void UpdateHUDHealth();
 	
 protected:
 	// Called when the game starts or when spawned
@@ -95,6 +97,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* HitReactMontage;
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	
 private:
 	void MoveForward(float Value);
@@ -130,7 +135,6 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
 	float Health = 100.f;
-
 	UFUNCTION()
 	void OnRep_Health(float LastHealth);
 

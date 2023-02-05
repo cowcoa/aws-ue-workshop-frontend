@@ -21,11 +21,14 @@ protected:
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
-public:	
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
+
+	// Only set this for Grenades and Rockets
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
 
 private:
 	UPROPERTY(EditAnywhere)

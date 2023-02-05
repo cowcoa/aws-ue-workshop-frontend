@@ -103,17 +103,27 @@ void ADayOneCharacter::MulticastHitReact_Implementation()
 	PlayHitReactMontage();
 }
 
-// Called when the game starts or when spawned
-void ADayOneCharacter::BeginPlay()
+void ADayOneCharacter::UpdateHUDHealth()
 {
-	Super::BeginPlay();
-
 	DayOnePlayerController = DayOnePlayerController == nullptr ? Cast<ADayOnePlayerController>(Controller) : DayOnePlayerController;
 	if (DayOnePlayerController)
 	{
 		DayOnePlayerController->SetHUDHealth(Health, MaxHealth);
 	}
+}
 
+// Called when the game starts or when spawned
+void ADayOneCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UpdateHUDHealth();
+	
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
+	}
+	
 	auto OverheadWidgetObject = Cast<UOverheadWidget>(OverheadWidget->GetUserWidgetObject());
 	if (OverheadWidgetObject)
 	{
@@ -126,6 +136,7 @@ void ADayOneCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ThisClass, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ThisClass, Health);
 }
 
 void ADayOneCharacter::PostInitializeComponents()
@@ -323,6 +334,16 @@ void ADayOneCharacter::PlayHitReactMontage()
 	}
 }
 
+void ADayOneCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+
+	UE_LOG(LogTemp, Warning, TEXT("Receive damage on server, current health is :%f"), Health);
+	//UpdateHUDHealth();
+	//PlayHitReactMontage();
+}
+
 void ADayOneCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value != 0.f)
@@ -374,6 +395,12 @@ float ADayOneCharacter::CalculateSpeed()
 
 void ADayOneCharacter::OnRep_Health(float LastHealth)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Receive damage on client"));
+	UpdateHUDHealth();
+	if (Health < LastHealth)
+	{
+		PlayHitReactMontage();
+	}
 }
 
 void ADayOneCharacter::ServerEquipButtonPressed_Implementation()
