@@ -112,11 +112,6 @@ void ADayOneCharacter::PlayElimMontage()
 	}
 }
 
-void ADayOneCharacter::MulticastHitReact_Implementation()
-{
-	PlayHitReactMontage();
-}
-
 void ADayOneCharacter::UpdateHUDHealth()
 {
 	DayOnePlayerController = DayOnePlayerController == nullptr ? Cast<ADayOnePlayerController>(Controller) : DayOnePlayerController;
@@ -437,7 +432,7 @@ float ADayOneCharacter::CalculateSpeed()
 void ADayOneCharacter::OnRep_Health(float LastHealth)
 {
 	UpdateHUDHealth();
-	if (Health < LastHealth)
+	if (Health < LastHealth && Health != 0.f)
 	{
 		PlayHitReactMontage();
 	}

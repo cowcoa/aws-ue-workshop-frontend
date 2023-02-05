@@ -70,11 +70,6 @@ void UCombatComponent::BeginPlay()
 
 	if (Character)
 	{
-		if (Character->Implements<UInteractWithCrosshairsInterface>())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("**** UInteractWithCrosshairsInterface &&&&"));
-		}
-		
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
 		if (Character->GetFollowCamera())

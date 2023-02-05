@@ -46,10 +46,6 @@ public:
 	void PlayFireMontage(bool bAiming);
 	void PlayElimMontage();
 
-	// Multicast play hit react montage
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHitReact();
-
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 
 	void UpdateHUDHealth();
