@@ -16,4 +16,5 @@ class DAYONE_API ABattlefieldGameMode : public AGameLiftGameMode
 
 public:
 	virtual void PlayerEliminated(class ADayOneCharacter* ElimmedCharacter, class ADayOnePlayerController* VictimController, ADayOnePlayerController* AttackerController);
+	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
 };

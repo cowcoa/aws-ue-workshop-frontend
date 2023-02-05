@@ -104,6 +104,10 @@ void ADayOneCharacter::PlayElimMontage()
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && ElimMontage)
 	{
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayElimMontage, Elim flag is: %s"), bElimmed ? *FString("true") : *FString("false"));
+		}
 		AnimInstance->Montage_Play(ElimMontage);
 	}
 }
@@ -125,6 +129,13 @@ void ADayOneCharacter::UpdateHUDHealth()
 void ADayOneCharacter::Elim(bool bPlayerLeftGame)
 {
 	MulticastElim(bPlayerLeftGame);
+
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ThisClass::ElimTimerFinished,
+		ElimDelay
+	);
 }
 
 void ADayOneCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
@@ -429,6 +440,15 @@ void ADayOneCharacter::OnRep_Health(float LastHealth)
 	if (Health < LastHealth)
 	{
 		PlayHitReactMontage();
+	}
+}
+
+void ADayOneCharacter::ElimTimerFinished()
+{
+	ABattlefieldGameMode *BattlefieldGameMode = GetWorld()->GetAuthGameMode<ABattlefieldGameMode>();
+	if (BattlefieldGameMode)
+	{
+		BattlefieldGameMode->RequestRespawn(this, Controller);
 	}
 }
 

@@ -155,6 +155,13 @@ private:
 
 	bool bElimmed = false;
 
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 1.5f;
+
+	void ElimTimerFinished();
+
 	// AO Data
 	float AO_Yaw;
 	float InterpAO_Yaw;
