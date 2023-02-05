@@ -74,6 +74,14 @@ void AWeapon::Fire(const FVector& HitTarget)
 	}
 }
 
+void AWeapon::Dropped()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	WeaponMesh->DetachFromComponent(DetachRules);
+	SetOwner(nullptr);
+}
+
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
@@ -107,11 +115,8 @@ void AWeapon::OnWeaponStateSet()
 	case EWeaponState::EWS_Equipped:
 		OnEquipped();
 		break;
-	case EWeaponState::EWS_EquippedSecondary:
-		//OnEquippedSecondary();
-		break;
 	case EWeaponState::EWS_Dropped:
-		//OnDropped();
+		OnDropped();
 		break;
 	}
 }
@@ -119,13 +124,24 @@ void AWeapon::OnWeaponStateSet()
 void AWeapon::OnEquipped()
 {
 	ShowPickupWidget(false);
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponMesh->SetSimulatePhysics(false);
+	WeaponMesh->SetEnableGravity(false);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AWeapon::OnDropped()
+{
 	if (HasAuthority())
 	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		WeaponMesh->SetSimulatePhysics(false);
-		WeaponMesh->SetEnableGravity(false);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetEnableGravity(true);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

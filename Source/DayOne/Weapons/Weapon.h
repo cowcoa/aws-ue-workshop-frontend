@@ -34,6 +34,8 @@ public:
 
 	virtual void Fire(const FVector& HitTarget);
 
+	virtual void Dropped();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,6 +43,7 @@ protected:
 
 	virtual void OnWeaponStateSet();
 	virtual void OnEquipped();
+	virtual void OnDropped();
 
 	UFUNCTION()
 	void OnSphereOverlap(

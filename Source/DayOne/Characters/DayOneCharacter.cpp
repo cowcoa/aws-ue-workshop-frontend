@@ -123,6 +123,11 @@ void ADayOneCharacter::UpdateHUDHealth()
 
 void ADayOneCharacter::Elim(bool bPlayerLeftGame)
 {
+	if (Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Dropped();
+	}
+	
 	MulticastElim(bPlayerLeftGame);
 
 	GetWorldTimerManager().SetTimer(
@@ -137,6 +142,26 @@ void ADayOneCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 {
 	bElimmed = true;
 	PlayElimMontage();
+
+	// Disable character movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	// Disable collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	TArray<USceneComponent*> MeshChildren;
+	GetMesh()->GetChildrenComponents(false, MeshChildren);
+	for (auto Child : MeshChildren)
+	{
+		USkeletalMeshComponent* MeshChild = Cast<USkeletalMeshComponent>(Child);
+		if (MeshChild != nullptr)
+		{
+			if (Combat->EquippedWeapon == nullptr || MeshChild != Combat->EquippedWeapon->GetWeaponMesh())
+			{
+				MeshChild->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
+		}
+	}
 }
 
 // Called when the game starts or when spawned
