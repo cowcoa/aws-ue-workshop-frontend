@@ -44,6 +44,7 @@ public:
 	* Play montages
 	*/
 	void PlayFireMontage(bool bAiming);
+	void PlayElimMontage();
 
 	// Multicast play hit react montage
 	UFUNCTION(NetMulticast, Unreliable)
@@ -52,6 +53,14 @@ public:
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 
 	void UpdateHUDHealth();
+
+	// character death
+	void Elim(bool bPlayerLeftGame);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastElim(bool bPlayerLeftGame);
+
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	
 protected:
 	// Called when the game starts or when spawned
@@ -98,6 +107,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
+
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	
@@ -140,6 +152,8 @@ private:
 
 	UPROPERTY()
 	class ADayOnePlayerController* DayOnePlayerController;
+
+	bool bElimmed = false;
 
 	// AO Data
 	float AO_Yaw;

@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "DayOne/DayOne.h"
 #include "DayOne/Components/CombatComponent.h"
+#include "DayOne/GameModes/BattlefieldGameMode.h"
 #include "DayOne/PlayerController/DayOnePlayerController.h"
 #include "DayOne/UI/OverheadWidget.h"
 #include "DayOne/Weapons/Weapon.h"
@@ -98,6 +99,15 @@ void ADayOneCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void ADayOneCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
+	}
+}
+
 void ADayOneCharacter::MulticastHitReact_Implementation()
 {
 	PlayHitReactMontage();
@@ -110,6 +120,17 @@ void ADayOneCharacter::UpdateHUDHealth()
 	{
 		DayOnePlayerController->SetHUDHealth(Health, MaxHealth);
 	}
+}
+
+void ADayOneCharacter::Elim(bool bPlayerLeftGame)
+{
+	MulticastElim(bPlayerLeftGame);
+}
+
+void ADayOneCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
+{
+	bElimmed = true;
+	PlayElimMontage();
 }
 
 // Called when the game starts or when spawned
@@ -339,7 +360,16 @@ void ADayOneCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const U
 {
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 
-	UE_LOG(LogTemp, Warning, TEXT("Receive damage on server, current health is :%f"), Health);
+	if (Health == 0.f)
+	{
+		ABattlefieldGameMode *BattlefieldGameMode = GetWorld()->GetAuthGameMode<ABattlefieldGameMode>();
+		if (BattlefieldGameMode)
+		{
+			DayOnePlayerController = DayOnePlayerController == nullptr ? Cast<ADayOnePlayerController>(Controller) : DayOnePlayerController;
+			ADayOnePlayerController* AttackerController = Cast<ADayOnePlayerController>(InstigatorController);
+			BattlefieldGameMode->PlayerEliminated(this, DayOnePlayerController, AttackerController);
+		}
+	}
 	//UpdateHUDHealth();
 	//PlayHitReactMontage();
 }
@@ -395,7 +425,6 @@ float ADayOneCharacter::CalculateSpeed()
 
 void ADayOneCharacter::OnRep_Health(float LastHealth)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Receive damage on client"));
 	UpdateHUDHealth();
 	if (Health < LastHealth)
 	{
