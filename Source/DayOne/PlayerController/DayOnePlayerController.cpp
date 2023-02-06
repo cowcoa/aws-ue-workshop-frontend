@@ -5,6 +5,7 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "DayOne/Characters/DayOneCharacter.h"
 #include "DayOne/HUD/CombatHUD.h"
 #include "DayOne/UI/CharacterOverlayWidget.h"
 
@@ -34,4 +35,10 @@ void ADayOnePlayerController::BeginPlay()
 void ADayOnePlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+
+	ADayOneCharacter* DayOneCharacter = Cast<ADayOneCharacter>(InPawn);
+	if (DayOneCharacter)
+	{
+		SetHUDHealth(DayOneCharacter->GetHealth(), DayOneCharacter->GetMaxHealth());
+	}
 }
