@@ -16,12 +16,22 @@ class DAYONE_API ADayOnePlayerController : public APlayerController
 
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDScore(float Score);
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void OnPossess(APawn* InPawn) override;
+
+	void PollInit();
 
 private:
 	UPROPERTY()
 	class ACombatHUD* CombatHUD;
+
+	UPROPERTY()
+	class UCharacterOverlayWidget* CharacterOverlay;
+
+	float HUDScore;
+	bool bInitializeScore = false;
 };

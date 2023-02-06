@@ -10,6 +10,7 @@
 #include "DayOne/Components/CombatComponent.h"
 #include "DayOne/GameModes/BattlefieldGameMode.h"
 #include "DayOne/PlayerController/DayOnePlayerController.h"
+#include "DayOne/PlayerStates/DayOnePlayerState.h"
 #include "DayOne/UI/OverheadWidget.h"
 #include "DayOne/Weapons/Weapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -405,6 +406,23 @@ void ADayOneCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const U
 	//PlayHitReactMontage();
 }
 
+void ADayOneCharacter::OnPlayerStateInitialized()
+{
+	DayOnePlayerState->AddToScore(0.f);
+}
+
+void ADayOneCharacter::PollInit()
+{
+	if (DayOnePlayerState == nullptr)
+	{
+		DayOnePlayerState = GetPlayerState<ADayOnePlayerState>();
+		if (DayOnePlayerState)
+		{
+			OnPlayerStateInitialized();
+		}
+	}
+}
+
 void ADayOneCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value != 0.f)
@@ -566,6 +584,7 @@ void ADayOneCharacter::Tick(float DeltaTime)
 	}
 	
 	HideCameraIfCharacterClose();
+	PollInit();
 }
 
 // Called to bind functionality to input

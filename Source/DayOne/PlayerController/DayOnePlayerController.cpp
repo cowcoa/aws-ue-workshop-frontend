@@ -25,11 +25,37 @@ void ADayOnePlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
+void ADayOnePlayerController::SetHUDScore(float Score)
+{
+	CombatHUD = CombatHUD == nullptr ? Cast<ACombatHUD>(GetHUD()) : CombatHUD;
+	bool bHUDValid = CombatHUD &&
+		CombatHUD->CharacterOverlay &&
+		CombatHUD->CharacterOverlay->ScoreAmount;
+
+	if (bHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
+		CombatHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+	}
+	else
+	{
+		bInitializeScore = true;
+		HUDScore = Score;
+	}
+}
+
 void ADayOnePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	CombatHUD = Cast<ACombatHUD>(GetHUD());
+}
+
+void ADayOnePlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	PollInit();
 }
 
 void ADayOnePlayerController::OnPossess(APawn* InPawn)
@@ -40,5 +66,20 @@ void ADayOnePlayerController::OnPossess(APawn* InPawn)
 	if (DayOneCharacter)
 	{
 		SetHUDHealth(DayOneCharacter->GetHealth(), DayOneCharacter->GetMaxHealth());
+	}
+}
+
+void ADayOnePlayerController::PollInit()
+{
+	if (CharacterOverlay == nullptr)
+	{
+		if (CombatHUD && CombatHUD->CharacterOverlay)
+		{
+			CharacterOverlay = CombatHUD->CharacterOverlay;
+			if (CharacterOverlay)
+			{
+				if (bInitializeScore) SetHUDScore(HUDScore);
+			}
+		}
 	}
 }

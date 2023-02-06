@@ -112,6 +112,11 @@ protected:
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+
+	void OnPlayerStateInitialized();
+	
+	// Poll for any relelvant classes and initialize our HUD
+	void PollInit();
 	
 private:
 	void MoveForward(float Value);
@@ -175,6 +180,9 @@ private:
 	void HideCameraIfCharacterClose();
 	UPROPERTY(EditAnywhere)
 	float CameraThreshold = 200.f;
+
+	UPROPERTY()
+	class ADayOnePlayerState* DayOnePlayerState;
 
 public:	
 	// Called every frame

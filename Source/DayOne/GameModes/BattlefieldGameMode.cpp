@@ -4,12 +4,25 @@
 #include "BattlefieldGameMode.h"
 
 #include "DayOne/Characters/DayOneCharacter.h"
+#include "DayOne/PlayerController/DayOnePlayerController.h"
+#include "DayOne/PlayerStates/DayOnePlayerState.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
 void ABattlefieldGameMode::PlayerEliminated(ADayOneCharacter* ElimmedCharacter,
                                             ADayOnePlayerController* VictimController, ADayOnePlayerController* AttackerController)
 {
+	// calculate score
+	if (AttackerController == nullptr || AttackerController->PlayerState == nullptr) return;
+	if (VictimController == nullptr || VictimController->PlayerState == nullptr) return;
+	ADayOnePlayerState* AttackerPlayerState = AttackerController ? Cast<ADayOnePlayerState>(AttackerController->PlayerState) : nullptr;
+	ADayOnePlayerState* VictimPlayerState = VictimController ? Cast<ADayOnePlayerState>(VictimController->PlayerState) : nullptr;
+
+	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	{
+		AttackerPlayerState->AddToScore(1.f);
+	}
+	
 	if (ElimmedCharacter)
 	{
 		ElimmedCharacter->Elim(false);
