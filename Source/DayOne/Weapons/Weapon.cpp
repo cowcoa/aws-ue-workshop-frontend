@@ -9,6 +9,7 @@
 #include "DayOne/Characters/DayOneCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Net/UnrealNetwork.h"
+#include "DayOne/PlayerController/DayOnePlayerController.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -72,6 +73,8 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
+
+	SpendRound();
 }
 
 void AWeapon::Dropped()
@@ -80,6 +83,21 @@ void AWeapon::Dropped()
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
 	SetOwner(nullptr);
+	DayOneOwnerCharacter = nullptr;
+	DayOneOwnerController = nullptr;
+}
+
+void AWeapon::SetHUDAmmo()
+{
+	DayOneOwnerCharacter = DayOneOwnerCharacter == nullptr ? Cast<ADayOneCharacter>(GetOwner()) : DayOneOwnerCharacter;
+	if (DayOneOwnerCharacter)
+	{
+		DayOneOwnerController = DayOneOwnerController == nullptr ? Cast<ADayOnePlayerController>(DayOneOwnerCharacter->Controller) : DayOneOwnerController;
+		if (DayOneOwnerController)
+		{
+			DayOneOwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
 }
 
 // Called when the game starts or when spawned
@@ -106,6 +124,21 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+
+	if (Owner == nullptr)
+	{
+		DayOneOwnerCharacter = nullptr;
+		DayOneOwnerController = nullptr;
+	}
+	else
+	{
+		SetHUDAmmo();
+	}
 }
 
 void AWeapon::OnWeaponStateSet()
@@ -172,6 +205,32 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void AWeapon::OnRep_WeaponState()
 {
 	OnWeaponStateSet();
+}
+
+void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
+{
+	/*
+	if (HasAuthority()) return;
+	Ammo = ServerAmmo;
+	--Sequence;
+	Ammo -= Sequence;
+	*/
+	SetHUDAmmo();
+}
+
+void AWeapon::SpendRound()
+{
+	//Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
+	--Ammo;
+	SetHUDAmmo();
+	if (HasAuthority())
+	{
+		ClientUpdateAmmo(Ammo);
+	}
+	else
+	{
+		++Sequence;
+	}
 }
 
 // Called every frame

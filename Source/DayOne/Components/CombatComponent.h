@@ -52,6 +52,8 @@ protected:
 
 	void Fire();
 
+	void DropEquippedWeapon();
+
 private:
 	UPROPERTY()
 	class ADayOneCharacter* Character;

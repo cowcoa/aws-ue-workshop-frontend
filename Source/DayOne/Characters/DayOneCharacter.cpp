@@ -141,6 +141,11 @@ void ADayOneCharacter::Elim(bool bPlayerLeftGame)
 
 void ADayOneCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 {
+	if (DayOnePlayerController)
+	{
+		DayOnePlayerController->SetHUDWeaponAmmo(0);
+	}
+	
 	bElimmed = true;
 	PlayElimMontage();
 

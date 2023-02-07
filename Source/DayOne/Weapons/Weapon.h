@@ -36,11 +36,14 @@ public:
 
 	virtual void Dropped();
 
+	void SetHUDAmmo();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
+	virtual void OnRep_Owner() override;
+	
 	virtual void OnWeaponStateSet();
 	virtual void OnEquipped();
 	virtual void OnDropped();
@@ -94,6 +97,26 @@ private:
 
     UPROPERTY(EditAnywhere)
     float ZoomInterpSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	int32 Ammo;
+
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	void SpendRound();
+
+	UPROPERTY(EditAnywhere)
+	int32 MagCapacity = 30;
+
+	// The number of unprocessed server requests for Ammo.
+	// Incremented in SpendRound, decremented in ClientUpdateAmmo.
+	int32 Sequence = 0;
+
+	UPROPERTY()
+	class ADayOneCharacter* DayOneOwnerCharacter;
+	UPROPERTY()
+	class ADayOnePlayerController* DayOneOwnerController;
 	
 public:	
 	// Called every frame
