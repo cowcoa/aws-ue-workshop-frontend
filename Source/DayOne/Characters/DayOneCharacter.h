@@ -201,6 +201,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	ECombatState GetCombatState() const;
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

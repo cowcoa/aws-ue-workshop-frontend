@@ -31,6 +31,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
 	void HandleReload();
+	int32 AmountToReload();
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
@@ -130,6 +131,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	void UpdateAmmoValues();
 
 	FTimerHandle FireTimer;
 	bool bCanFire = true;

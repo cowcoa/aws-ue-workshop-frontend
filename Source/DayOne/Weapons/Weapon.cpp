@@ -82,6 +82,7 @@ void AWeapon::Dropped()
 	SetWeaponState(EWeaponState::EWS_Dropped);
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
+	UE_LOG(LogTemp, Warning, TEXT("dropped weapon ammo on server: %d"), Ammo);
 	SetOwner(nullptr);
 	DayOneOwnerCharacter = nullptr;
 	DayOneOwnerController = nullptr;
@@ -103,6 +104,11 @@ void AWeapon::SetHUDAmmo()
 bool AWeapon::IsEmpty()
 {
 	return Ammo <= 0;
+}
+
+bool AWeapon::IsFull()
+{
+	return Ammo == MagCapacity;
 }
 
 // Called when the game starts or when spawned
@@ -139,9 +145,12 @@ void AWeapon::OnRep_Owner()
 	{
 		DayOneOwnerCharacter = nullptr;
 		DayOneOwnerController = nullptr;
+
+		UE_LOG(LogTemp, Warning, TEXT("dropped weapon ammo on client: %d"), Ammo);
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Picked up weapon ammo on client: %d"), Ammo);
 		SetHUDAmmo();
 	}
 }
@@ -214,11 +223,25 @@ void AWeapon::OnRep_WeaponState()
 
 void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
 {
-	/*
 	if (HasAuthority()) return;
 	Ammo = ServerAmmo;
+	/*
 	--Sequence;
 	Ammo -= Sequence;
+	*/
+	SetHUDAmmo();
+}
+
+void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
+{
+	if (HasAuthority()) return;
+	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
+	/*
+	DayOneOwnerCharacter = DayOneOwnerCharacter == nullptr ? Cast<ADayOneCharacter>(GetOwner()) : DayOneOwnerCharacter;
+	if (DayOneOwnerCharacter && DayOneOwnerCharacter->GetCombat() && IsFull())
+	{
+		DayOneOwnerCharacter->GetCombat()->JumpToShotgunEnd();
+	}
 	*/
 	SetHUDAmmo();
 }
@@ -242,5 +265,13 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AWeapon::AddAmmo(int32 AmmoToAdd)
+{
+	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
+	UE_LOG(LogTemp, Warning, TEXT("Add Ammo result on Server: %d"), Ammo);
+	SetHUDAmmo();
+	ClientAddAmmo(AmmoToAdd); 
 }
 

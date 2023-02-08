@@ -41,6 +41,8 @@ public:
 
 	bool IsEmpty();
 
+	bool IsFull();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -107,6 +109,9 @@ private:
 	UFUNCTION(Client, Reliable)
 	void ClientUpdateAmmo(int32 ServerAmmo);
 
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
+
 	void SpendRound();
 
 	UPROPERTY(EditAnywhere)
@@ -150,6 +155,11 @@ public:
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+
+	void AddAmmo(int32 AmmoToAdd);
 	
 	/** 
 	* Automatic fire
