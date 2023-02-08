@@ -135,6 +135,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::OnRep_Owner()
@@ -246,10 +247,16 @@ void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
 	SetHUDAmmo();
 }
 
+void AWeapon::OnRep_Ammo()
+{
+	SetHUDAmmo();
+}
+
 void AWeapon::SpendRound()
 {
 	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
 	SetHUDAmmo();
+	/*
 	if (HasAuthority())
 	{
 		ClientUpdateAmmo(Ammo);
@@ -258,6 +265,7 @@ void AWeapon::SpendRound()
 	{
 		++Sequence;
 	}
+	*/
 }
 
 // Called every frame
@@ -272,6 +280,6 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
 	UE_LOG(LogTemp, Warning, TEXT("Add Ammo result on Server: %d"), Ammo);
 	SetHUDAmmo();
-	ClientAddAmmo(AmmoToAdd); 
+	//ClientAddAmmo(AmmoToAdd); 
 }
 

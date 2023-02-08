@@ -103,8 +103,10 @@ private:
     UPROPERTY(EditAnywhere)
     float ZoomInterpSpeed = 20.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Ammo)
 	int32 Ammo;
+	UFUNCTION()
+	void OnRep_Ammo();
 
 	UFUNCTION(Client, Reliable)
 	void ClientUpdateAmmo(int32 ServerAmmo);
