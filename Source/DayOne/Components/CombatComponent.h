@@ -67,6 +67,8 @@ protected:
 
 	void UpdateCarriedAmmo();
 
+	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);
+
 private:
 	UPROPERTY()
 	class ADayOneCharacter* Character;

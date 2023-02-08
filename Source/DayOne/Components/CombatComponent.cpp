@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -43,6 +44,7 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon->SetOwner(Character);
 	EquippedWeapon->SetHUDAmmo();
 	UpdateCarriedAmmo();
+	PlayEquipWeaponSound(WeaponToEquip);
 }
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
@@ -161,6 +163,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		AttachActorToRightHand(EquippedWeapon);
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
+		PlayEquipWeaponSound(EquippedWeapon);
 	}
 }
 
@@ -342,6 +345,18 @@ void UCombatComponent::UpdateCarriedAmmo()
 	if (Controller)
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+}
+
+void UCombatComponent::PlayEquipWeaponSound(AWeapon* WeaponToEquip)
+{
+	if (Character && WeaponToEquip && WeaponToEquip->EquipSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			WeaponToEquip->EquipSound,
+			Character->GetActorLocation()
+		);
 	}
 }
 

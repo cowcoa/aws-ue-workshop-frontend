@@ -43,6 +43,9 @@ public:
 
 	bool IsFull();
 
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EquipSound;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
