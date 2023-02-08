@@ -18,6 +18,7 @@ public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDScore(float Score);
 	void SetHUDWeaponAmmo(int32 Ammo);
+	void SetHUDCarriedAmmo(int32 Ammo);
 
 protected:
 	virtual void BeginPlay() override;
@@ -37,4 +38,6 @@ private:
 	bool bInitializeScore = false;
 	float HUDWeaponAmmo;
 	bool bInitializeWeaponAmmo = false;
+	float HUDCarriedAmmo;
+	bool bInitializeCarriedAmmo = false;
 };

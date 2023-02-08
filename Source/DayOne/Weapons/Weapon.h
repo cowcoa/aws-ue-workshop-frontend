@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "DayOne/Weapons/WeaponTypes.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -119,6 +120,9 @@ private:
 	class ADayOneCharacter* DayOneOwnerCharacter;
 	UPROPERTY()
 	class ADayOnePlayerController* DayOneOwnerController;
+
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
 	
 public:	
 	// Called every frame
@@ -145,6 +149,8 @@ public:
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	
 	/** 
 	* Automatic fire
 	*/

@@ -62,6 +62,24 @@ void ADayOnePlayerController::SetHUDWeaponAmmo(int32 Ammo)
 	}
 }
 
+void ADayOnePlayerController::SetHUDCarriedAmmo(int32 Ammo)
+{
+	CombatHUD = CombatHUD == nullptr ? Cast<ACombatHUD>(GetHUD()) : CombatHUD;
+	bool bHUDValid = CombatHUD &&
+		CombatHUD->CharacterOverlay &&
+		CombatHUD->CharacterOverlay->CarriedAmmoAmount;
+	if (bHUDValid)
+	{
+		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
+		CombatHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+	else
+	{
+		bInitializeCarriedAmmo = true;
+		HUDCarriedAmmo = Ammo;
+	}
+}
+
 void ADayOnePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -98,6 +116,7 @@ void ADayOnePlayerController::PollInit()
 			{
 				if (bInitializeScore) SetHUDScore(HUDScore);
 				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
+				if (bInitializeCarriedAmmo) SetHUDCarriedAmmo(HUDCarriedAmmo);
 			}
 		}
 	}

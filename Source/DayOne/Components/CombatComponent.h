@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DayOne/HUD/CombatHUD.h"
+#include "DayOne/Weapons/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -53,6 +54,8 @@ protected:
 	void Fire();
 
 	void DropEquippedWeapon();
+
+	void UpdateCarriedAmmo();
 
 private:
 	UPROPERTY()
@@ -111,6 +114,7 @@ private:
 	/**
 	* Automatic fire
 	*/
+	void InitializeCarriedAmmo();
 
 	FTimerHandle FireTimer;
 	bool bCanFire = true;
@@ -119,6 +123,18 @@ private:
 	void FireTimerFinished();
 
 	bool CanFire();
+
+	// Carried ammo for the currently-equipped weapon
+	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
+	int32 CarriedAmmo;
+
+	UFUNCTION()
+	void OnRep_CarriedAmmo();
+
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingARAmmo = 30;
 
 public:	
 	// Called every frame
