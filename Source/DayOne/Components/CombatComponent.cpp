@@ -45,6 +45,7 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon->SetHUDAmmo();
 	UpdateCarriedAmmo();
 	PlayEquipWeaponSound(WeaponToEquip);
+	ReloadEmptyWeapon();
 }
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
@@ -348,6 +349,14 @@ void UCombatComponent::UpdateCarriedAmmo()
 	}
 }
 
+void UCombatComponent::ReloadEmptyWeapon()
+{
+	if (EquippedWeapon && EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
+}
+
 void UCombatComponent::PlayEquipWeaponSound(AWeapon* WeaponToEquip)
 {
 	if (Character && WeaponToEquip && WeaponToEquip->EquipSound)
@@ -466,13 +475,9 @@ void UCombatComponent::FireTimerFinished()
 	bCanFire = true;
 	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Fire Again"));
 		Fire();
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't Fire Again"));
-	}
+	ReloadEmptyWeapon();
 }
 
 bool UCombatComponent::CanFire()

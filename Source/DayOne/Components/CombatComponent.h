@@ -67,6 +67,8 @@ protected:
 
 	void UpdateCarriedAmmo();
 
+	void ReloadEmptyWeapon();
+
 	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);
 
 private:
