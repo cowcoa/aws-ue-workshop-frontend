@@ -347,7 +347,9 @@ void UCombatComponent::FireTimerFinished()
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr) return false;
-	return bCanFire;
+	if (!EquippedWeapon->IsEmpty() && bCanFire) return true;
+
+	return false;
 }
 
 // Called every frame
