@@ -100,6 +100,27 @@ void ADayOneCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void ADayOneCharacter::PlayReloadMontage()
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
+		FName SectionName;
+
+		switch (Combat->EquippedWeapon->GetWeaponType())
+		{
+		case EWeaponType::EWT_AssaultRifle:
+			SectionName = FName("Rifle");
+			break;
+		}
+
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
 void ADayOneCharacter::PlayElimMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -300,6 +321,19 @@ void ADayOneCharacter::FireButtonReleased()
 	{
 		Combat->FireButtonPressed(false);
 	}
+}
+
+void ADayOneCharacter::ReloadButtonPressed()
+{
+	if (Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ReloadButtonPressed"));
+		Combat->Reload();
+	}
+}
+
+void ADayOneCharacter::ReloadButtonReleased()
+{
 }
 
 void ADayOneCharacter::AimOffset(float DeltaTime)
@@ -599,3 +633,8 @@ void ADayOneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	
 }
 
+ECombatState ADayOneCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_MAX;
+	return Combat->CombatState;
+}

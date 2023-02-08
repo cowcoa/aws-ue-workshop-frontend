@@ -3,6 +3,7 @@
 
 #include "DayOneAnimInstance.h"
 
+#include "DayOne/Components/CombatState.h"
 #include "DayOne/Weapons/Weapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -80,4 +81,6 @@ void UDayOneAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			DrawDebugLine(GetWorld(), MFSocketTransform.GetLocation(), MFSocketTransform.GetLocation() + MFDirection * 1000.0f, FColor::Orange);
 		}
 	}
+
+	bUseFABRIK = DayOneCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
 }

@@ -6,6 +6,7 @@
 #include "DayOne/Interfaces/InteractWithCrosshairsInterface.h"
 #include "GameFramework/Character.h"
 #include "EnhancedInput/Public/InputActionValue.h"
+#include "DayOne/Components/CombatState.h"
 #include "DayOneCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -44,6 +45,7 @@ public:
 	* Play montages
 	*/
 	void PlayFireMontage(bool bAiming);
+	void PlayReloadMontage();
 	void PlayElimMontage();
 
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
@@ -88,6 +90,10 @@ protected:
 	void FireButtonPressed();
 	UFUNCTION(BlueprintCallable, Category=Input)
 	void FireButtonReleased();
+	UFUNCTION(BlueprintCallable, Category=Input)
+	void ReloadButtonPressed();
+	UFUNCTION(BlueprintCallable, Category=Input)
+	void ReloadButtonReleased();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UWidgetComponent* OverheadWidget;
@@ -103,6 +109,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* ReloadMontage;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* HitReactMontage;
@@ -190,6 +199,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	ECombatState GetCombatState() const;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;

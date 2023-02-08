@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CombatState.h"
 #include "Components/ActorComponent.h"
 #include "DayOne/HUD/CombatHUD.h"
 #include "DayOne/Weapons/WeaponTypes.h"
@@ -25,6 +26,14 @@ public:
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
 
 	void FireButtonPressed(bool bPressed);
+
+	void Reload();
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
+	void HandleReload();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
 
 protected:
 	// Called when the game starts
@@ -115,6 +124,12 @@ private:
 	* Automatic fire
 	*/
 	void InitializeCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+	void OnRep_CombatState();
 
 	FTimerHandle FireTimer;
 	bool bCanFire = true;
