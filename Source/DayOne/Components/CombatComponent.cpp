@@ -45,7 +45,7 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon->SetHUDAmmo();
 	UpdateCarriedAmmo();
 	PlayEquipWeaponSound(WeaponToEquip);
-	ReloadEmptyWeapon();
+	//ReloadEmptyWeapon();
 }
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
