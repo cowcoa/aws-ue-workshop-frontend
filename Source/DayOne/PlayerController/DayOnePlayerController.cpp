@@ -80,6 +80,34 @@ void ADayOnePlayerController::SetHUDCarriedAmmo(int32 Ammo)
 	}
 }
 
+float ADayOnePlayerController::GetServerTime()
+{
+	if (HasAuthority()) return GetWorld()->GetTimeSeconds();
+	else return GetWorld()->GetTimeSeconds() + ClientServerDelta;
+}
+
+void ADayOnePlayerController::SetHUDMatchCountdown(float CountdownTime)
+{
+	CombatHUD = CombatHUD == nullptr ? Cast<ACombatHUD>(GetHUD()) : CombatHUD;
+	bool bHUDValid = CombatHUD &&
+		CombatHUD->CharacterOverlay &&
+		CombatHUD->CharacterOverlay->MatchCountdownText;
+	if (bHUDValid)
+	{
+		if (CountdownTime < 0.f)
+		{
+			CombatHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
+			return;
+		}
+
+		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+		int32 Seconds = CountdownTime - Minutes * 60;
+
+		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		CombatHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(CountdownText));
+	}
+}
+
 void ADayOnePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -91,6 +119,8 @@ void ADayOnePlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	SetHUDTime();
+	CheckTimeSync(DeltaTime);
 	PollInit();
 }
 
@@ -103,6 +133,29 @@ void ADayOnePlayerController::OnPossess(APawn* InPawn)
 	{
 		SetHUDHealth(DayOneCharacter->GetHealth(), DayOneCharacter->GetMaxHealth());
 	}
+}
+
+void ADayOnePlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+
+	if (IsLocalController())
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+	}
+}
+
+void ADayOnePlayerController::SetHUDTime()
+{
+	float TimeLeft = MatchTime - GetServerTime();
+	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+
+	if (CountdownInt != SecondsLeft)
+	{
+		SetHUDMatchCountdown(TimeLeft);
+	}
+
+	CountdownInt = SecondsLeft;
 }
 
 void ADayOnePlayerController::PollInit()
@@ -120,4 +173,29 @@ void ADayOnePlayerController::PollInit()
 			}
 		}
 	}
+}
+
+void ADayOnePlayerController::CheckTimeSync(float DeltaTime)
+{
+	TimeSyncRunningTime += DeltaTime;
+	if (IsLocalController() && TimeSyncRunningTime > TimeSyncFrequency)
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+		TimeSyncRunningTime = 0.f;
+	}
+}
+
+void ADayOnePlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
+{
+	float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
+	ClientReportServerTime(TimeOfClientRequest, ServerTimeOfReceipt);
+}
+
+void ADayOnePlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest,
+	float TimeServerReceivedClientRequest)
+{
+	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	SingleTripTime = 0.5f * RoundTripTime;
+	float CurrentServerTime = TimeServerReceivedClientRequest + SingleTripTime;
+	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
