@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DayOne/GameInstance/GameLiftGameInstance.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "GameLiftGameMode.generated.h"
 
 UENUM()
@@ -24,7 +24,7 @@ enum class EGameSessionState : uint8
  * 
  */
 UCLASS()
-class DAYONE_API AGameLiftGameMode : public AGameModeBase
+class DAYONE_API AGameLiftGameMode : public AGameMode
 {
 	GENERATED_BODY()
 

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
-#include "DayOneGameState.generated.h"
+#include "BattlefieldGameState.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DAYONE_API ADayOneGameState : public AGameState
+class DAYONE_API ABattlefieldGameState : public AGameState
 {
 	GENERATED_BODY()
 
