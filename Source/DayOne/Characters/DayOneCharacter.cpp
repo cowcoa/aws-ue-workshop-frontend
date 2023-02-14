@@ -171,8 +171,13 @@ void ADayOneCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 	PlayElimMontage();
 
 	// Disable character movement
+	bDisableGameplay = true;
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
+	if (Combat)
+	{
+		Combat->FireButtonPressed(false);
+	}
 	// Disable collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -216,6 +221,7 @@ void ADayOneCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME_CONDITION(ThisClass, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ThisClass, Health);
+	DOREPLIFETIME(ThisClass, bDisableGameplay);
 }
 
 void ADayOneCharacter::PostInitializeComponents()
@@ -261,6 +267,7 @@ void ADayOneCharacter::Look(const FVector2D& LookValue)
 
 void ADayOneCharacter::JumpUp()
 {
+	if (bDisableGameplay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -273,6 +280,7 @@ void ADayOneCharacter::JumpUp()
 
 void ADayOneCharacter::EquipButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		ServerEquipButtonPressed();
@@ -281,6 +289,7 @@ void ADayOneCharacter::EquipButtonPressed()
 
 void ADayOneCharacter::CrouchButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -293,6 +302,7 @@ void ADayOneCharacter::CrouchButtonPressed()
 
 void ADayOneCharacter::AimButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(true);
@@ -301,6 +311,7 @@ void ADayOneCharacter::AimButtonPressed()
 
 void ADayOneCharacter::AimButtonReleased()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(false);
@@ -309,6 +320,7 @@ void ADayOneCharacter::AimButtonReleased()
 
 void ADayOneCharacter::FireButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->FireButtonPressed(true);
@@ -317,6 +329,7 @@ void ADayOneCharacter::FireButtonPressed()
 
 void ADayOneCharacter::FireButtonReleased()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
@@ -325,6 +338,7 @@ void ADayOneCharacter::FireButtonReleased()
 
 void ADayOneCharacter::ReloadButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ReloadButtonPressed"));
@@ -464,6 +478,7 @@ void ADayOneCharacter::PollInit()
 
 void ADayOneCharacter::MoveForward(float Value)
 {
+	if (bDisableGameplay) return;
 	if (Controller != nullptr && Value != 0.f)
 	{
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -474,6 +489,7 @@ void ADayOneCharacter::MoveForward(float Value)
 
 void ADayOneCharacter::MoveRight(float Value)
 {
+	if (bDisableGameplay) return;
 	if (Controller != nullptr && Value != 0.f)
     {
     	const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -608,6 +624,21 @@ void ADayOneCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	RotateInPlace(DeltaTime);
+	HideCameraIfCharacterClose();
+	PollInit();
+}
+
+void ADayOneCharacter::RotateInPlace(float DeltaTime)
+{
+	if (Combat && Combat->EquippedWeapon) GetCharacterMovement()->bOrientRotationToMovement = false;
+	if (Combat && Combat->EquippedWeapon) bUseControllerRotationYaw = true;
+	if (bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
 	{
 		AimOffset(DeltaTime);
@@ -621,9 +652,6 @@ void ADayOneCharacter::Tick(float DeltaTime)
 		}
 		CalculateAO_Pitch();
 	}
-	
-	HideCameraIfCharacterClose();
-	PollInit();
 }
 
 // Called to bind functionality to input

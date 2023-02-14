@@ -40,6 +40,15 @@ public:
 	
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 
+	// Announcement UI
+	UPROPERTY(EditAnywhere, Category = "Announcements")
+	TSubclassOf<UUserWidget> AnnouncementClass;
+
+	UPROPERTY()
+	class UAnnouncementWidget* Announcement;
+
+	void AddAnnouncement();
+
 protected:
 	virtual void BeginPlay() override;
 

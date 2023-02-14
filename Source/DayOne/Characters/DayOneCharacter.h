@@ -52,6 +52,11 @@ public:
 
 	void UpdateHUDHealth();
 
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
+
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
+
 	// character death
 	void Elim(bool bPlayerLeftGame);
 
@@ -101,6 +106,8 @@ protected:
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
 	void SimProxiesTurn();
+
+	void RotateInPlace(float DeltaTime);
 
 	/**
 	* Animation montages

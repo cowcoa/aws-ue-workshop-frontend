@@ -84,6 +84,6 @@ void UDayOneAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	// for reloading, disable left hand FABRIK, disable aim offsets, disable right hand rotation.
 	bUseFABRIK = DayOneCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
-	bUseAimOffsets = DayOneCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
-	bTransformRightHand = DayOneCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
+	bUseAimOffsets = DayOneCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !DayOneCharacter->GetDisableGameplay();
+	bTransformRightHand = DayOneCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !DayOneCharacter->GetDisableGameplay();
 }

@@ -4,6 +4,7 @@
 #include "CombatHUD.h"
 
 #include "Blueprint/UserWidget.h"
+#include "DayOne/UI/AnnouncementWidget.h"
 #include "DayOne/UI/CharacterOverlayWidget.h"
 
 void ACombatHUD::DrawHUD()
@@ -56,11 +57,19 @@ void ACombatHUD::AddCharacterOverlay()
 	}
 }
 
+void ACombatHUD::AddAnnouncement()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && AnnouncementClass)
+	{
+		Announcement = CreateWidget<UAnnouncementWidget>(PlayerController, AnnouncementClass);
+		Announcement->AddToViewport();
+	}
+}
+
 void ACombatHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	AddCharacterOverlay();
 }
 
 void ACombatHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread,

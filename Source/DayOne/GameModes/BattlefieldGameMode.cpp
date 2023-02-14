@@ -9,6 +9,56 @@
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
+namespace MatchState
+{
+	const FName Cooldown = FName("Cooldown");
+}
+
+ABattlefieldGameMode::ABattlefieldGameMode()
+{
+	bDelayedStart = true;
+}
+
+void ABattlefieldGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void ABattlefieldGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameMode in WaitingToStart"))
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameMode in InProgress"))
+		CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			SetMatchState(MatchState::Cooldown);
+		}
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameMode in Cooldown"))
+		CountdownTime = CooldownTime + WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			RestartGame();
+		}
+	}
+}
+
 void ABattlefieldGameMode::PlayerEliminated(ADayOneCharacter* ElimmedCharacter,
                                             ADayOnePlayerController* VictimController, ADayOnePlayerController* AttackerController)
 {
@@ -42,5 +92,19 @@ void ABattlefieldGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AControl
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
+	}
+}
+
+void ABattlefieldGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ADayOnePlayerController* DayOnePlayer = Cast<ADayOnePlayerController>(*It);
+		if (DayOnePlayer)
+		{
+			DayOnePlayer->OnMatchStateSet(MatchState);
+		}
 	}
 }
